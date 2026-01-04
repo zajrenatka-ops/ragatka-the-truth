@@ -5,11 +5,29 @@ local Tween = game:GetService(`TweenService`)
 local LocalPlr = game.Players.LocalPlayer
 local PlayerGui = LocalPlr.PlayerGui
 
+local WorkspaceRemotes = workspace:WaitForChild(`EventsFolder`)
 
 -- Модуль генерации Ui
 local UiModule = {
 	GuiObject = {},
 	UIComponent = {},
+	Colors = {
+		Black = Color3.fromRGB(0,0,0),
+		White = Color3.fromRGB(255,255,255),
+		Blue = Color3.fromRGB(0, 80, 255),
+		Red = Color3.fromRGB(255, 0, 4),
+	},
+	Icons = {
+		Close = `http://www.roblox.com/asset/?id=6031094678`,
+		Peoples = `http://www.roblox.com/asset/?id=6034287513`,
+		Delete = `http://www.roblox.com/asset/?id=6022668939`,
+		TwoChecked = `http://www.roblox.com/asset/?id=6023426929`,
+		
+		
+	},
+	Other = {
+		MainFont = Enum.Font.Arcade,
+	}
 }
 
 function UiModule.UIComponent.Corner(GuiObject:GuiObject, Radius:number)
@@ -20,12 +38,21 @@ function UiModule.UIComponent.Corner(GuiObject:GuiObject, Radius:number)
 	return Component
 end
 
-function UiModule.UIComponent.Padding(GuiObject:GuiObject, PaddingRadius:number)
+function UiModule.UIComponent.Stroke(GuiObject:GuiObject)
+	local Component = Instance.new(`UIStroke`)
+	Component.BorderOffset = UDim.new(0, 2)
+	Component.Thickness = 2
+	--Component
+	Component.Parent = GuiObject
+
+	return Component
+end
+function UiModule.UIComponent.Padding(GuiObject:GuiObject, PaddingRadiusX:number, PaddingRadiusY:number)
 	local Component = Instance.new(`UIPadding`)
-	Component.PaddingBottom = UDim.new(0, PaddingRadius or 15)
-	Component.PaddingLeft = UDim.new(0, PaddingRadius or 15)
-	Component.PaddingRight = UDim.new(0, PaddingRadius or 15)
-	Component.PaddingTop = UDim.new(0, PaddingRadius or 15)
+	Component.PaddingBottom = UDim.new(0, PaddingRadiusY or 15)
+	Component.PaddingTop = UDim.new(0, PaddingRadiusY or 15)
+	Component.PaddingLeft = UDim.new(0, PaddingRadiusX or 15)
+	Component.PaddingRight = UDim.new(0, PaddingRadiusX or 15)
 	Component.Parent = GuiObject
 
 	return Component
@@ -33,15 +60,272 @@ end
 
 function UiModule.UIComponent.List(GuiObject:GuiObject, FillDirectrion:Enum.FillDirection)
 	local Component = Instance.new(`UIListLayout`)
-	Component.Padding = 5
+	Component.Padding = UDim.new(0, 5)
 	Component.FillDirection = FillDirectrion or Enum.FillDirection.Vertical
 	Component.SortOrder = Enum.SortOrder.LayoutOrder
+	Component.Parent = GuiObject
 	
 	return Component
 end
 
-
-function UiModule.GuiObject.AutoScaleFrame()
+function UiModule.GuiObject.AutoScaleFrame(ParentTo, Color:Color3, BackgroundTransparency:number)
 	local Frame = Instance.new(`Frame`)
-	--Frame
+	Frame.BorderSizePixel = 0
+	Frame.Size = UDim2.fromScale(0,0)
+	Frame.BackgroundColor3 = Color or UiModule.Colors.Black
+	Frame.BackgroundTransparency = BackgroundTransparency or 1
+	Frame.AutomaticSize = `XY`
+	Frame.Parent = ParentTo
+
+	return Frame
 end
+
+function UiModule.GuiObject.Frame(ParentTo, Color:Color3, BackgroundTransparency:number)
+	local Frame = Instance.new(`Frame`)
+	Frame.BorderSizePixel = 0	
+	Frame.BackgroundColor3 = Color or Color3.fromRGB(0, 0, 0)
+	Frame.BackgroundTransparency = BackgroundTransparency or 1
+	Frame.Size = UDim2.fromScale(0,0)
+	Frame.Parent = ParentTo
+	
+	return Frame
+end
+
+function UiModule.GuiObject.Scrolling(ParentTo)
+	local Scrolling = Instance.new(`ScrollingFrame`)
+	Scrolling.BorderSizePixel = 0
+	Scrolling.AutomaticCanvasSize = `XY`
+	Scrolling.CanvasSize = UDim2.fromScale(0,0)
+	Scrolling.Transparency = 1
+	Scrolling.Size = UDim2.fromOffset(150, 250)
+	Scrolling.Parent = ParentTo
+	
+	return Scrolling
+end
+
+function UiModule.GuiObject.Image(ParentTo, ImageForImage:string, Size:UDim2)
+	local Image = Instance.new(`ImageLabel`)
+	Image.Size = Size
+	Image.BackgroundTransparency = 1
+	Image.BorderSizePixel = 0
+	Image.Image = ImageForImage
+	Image.Parent = ParentTo
+	
+	return Image
+end
+
+function UiModule.GuiObject.Text(ParentTo, LabelText:string)
+	local Text = Instance.new(`TextLabel`)
+	Text.AutomaticSize = `XY`
+	Text.Text = LabelText or ``
+	Text.TextSize = 20
+	Text.TextColor3 = UiModule.Colors.White
+	Text.RichText = true
+	Text.BackgroundTransparency = 1
+	Text.Font = UiModule.Other.MainFont
+	Text.Parent = ParentTo
+
+	--UiModule.UIComponent.Padding(Text, 5, 2)
+	--UiModule.UIComponent.Corner(Text)
+
+	return Text
+end
+
+
+function UiModule.GuiObject.TextButton(ParentTo, Text:string, Icon:string)
+	local Button = Instance.new(`ImageButton`)
+	Button.AutomaticSize = `XY`
+	Button.BackgroundColor3 = UiModule.Colors.Black
+	Button.BackgroundTransparency = .5
+	
+	UiModule.UIComponent.List(Button, Enum.FillDirection.Horizontal)
+	UiModule.GuiObject.Text(Button, Text or ``)
+	
+	if Icon then
+		UiModule.GuiObject.Image(Button, Icon, UDim2.fromOffset(20,20))
+	end
+	
+	UiModule.UIComponent.Padding(Button, 10, 5)
+	UiModule.UIComponent.Corner(Button, 15)
+	Button.Parent = ParentTo
+	
+	return Button
+end
+
+function UiModule.GuiObject.ImageButton(ParentTo, Image:string, Size:UDim2, Color:Color3)
+	local Button = Instance.new(`ImageButton`)
+	Button.BorderSizePixel = 0
+	Button.Size = Size or UDim2.fromOffset(20,20)
+	Button.BackgroundColor3 = Color or UiModule.Colors.White
+	Button.Image = Image
+	Button.Parent = ParentTo
+	
+	return Button
+end
+
+
+local function ClearMusor()
+	for i, idk in pairs(game.CollectionService:GetTagged(`Debris`)) do
+		idk:Destroy()
+	end
+end
+
+-- Начинаем делать грязь.
+
+local MainGui = Instance.new(`ScreenGui`)
+MainGui.DisplayOrder = 10000
+MainGui.Name = `RagatkaTheTruth_Gui`
+MainGui.IgnoreGuiInset = true
+MainGui.ResetOnSpawn = false
+MainGui.Parent = PlayerGui
+
+
+local Osnova = UiModule.GuiObject.AutoScaleFrame(MainGui, UiModule.Colors.Blue, .5)
+Osnova.Position = UDim2.fromScale(.5,.5)
+Osnova.AnchorPoint = Vector2.new(.5,.5)
+UiModule.UIComponent.Corner(Osnova, 15)
+UiModule.UIComponent.Padding(Osnova, 15, 15)
+UiModule.UIComponent.List(Osnova, Enum.FillDirection.Vertical)
+
+local UpBar = UiModule.GuiObject.AutoScaleFrame(Osnova)
+UpBar.Size = UDim2.fromScale(1,0)
+
+local WelcomeText = UiModule.GuiObject.Text(UpBar, `Привет, <b>{LocalPlr.Name}</b>.`)
+WelcomeText.TextSize = 25
+WelcomeText.AnchorPoint = Vector2.new(0, .5)
+WelcomeText.Position = UDim2.fromScale(0, .5)
+
+local Close = UiModule.GuiObject.ImageButton(UpBar, UiModule.Icons.Close, UDim2.fromOffset(25,25), UiModule.Colors.Red)
+Close.AnchorPoint = Vector2.new(1, .5)
+Close.Position = UDim2.fromScale(1, .5)
+UiModule.UIComponent.Corner(Close, 15)
+Close.MouseButton1Click:Connect(function()
+	MainGui:Destroy()
+end)
+
+local OsnovaCont = UiModule.GuiObject.AutoScaleFrame(Osnova)
+UiModule.UIComponent.List(OsnovaCont, Enum.FillDirection.Horizontal)
+
+local LeftBar = UiModule.GuiObject.Scrolling(OsnovaCont)
+UiModule.UIComponent.List(LeftBar, Enum.FillDirection.Vertical)
+LeftBar.Size = UDim2.fromOffset(280, 350)
+
+local RightBar = UiModule.GuiObject.Frame(OsnovaCont)
+RightBar.Size = UDim2.fromOffset(450, 350)
+
+local CategoryName = UiModule.GuiObject.Text(LeftBar, `<i>Feretanne Project</i>`)
+
+local KillButton = UiModule.GuiObject.TextButton(LeftBar, `Килл игроков`, UiModule.Icons.Peoples)
+local KickButton = UiModule.GuiObject.TextButton(LeftBar, `Кик игроков`, UiModule.Icons.Peoples)
+
+KickButton.MouseButton1Click:Connect(function()
+	ClearMusor()
+	
+	local Tab = UiModule.GuiObject.Frame(RightBar)
+	UiModule.UIComponent.List(Tab, Enum.FillDirection.Vertical)
+	Tab:AddTag(`Debris`)
+	Tab.Size = UDim2.fromScale(1,1)
+	
+	local ChosenPlayers = {}
+	
+	local TabName = UiModule.GuiObject.Text(Tab, `<i>Кик игроков</i>: <b>{#ChosenPlayers}</b>`)
+	TabName.TextSize = 25
+	
+	UiModule.GuiObject.Text(Tab, `Лист с игроками`).TextSize = 15
+
+	local PlayersScroll = UiModule.GuiObject.Scrolling(Tab)
+	PlayersScroll.Size = UDim2.new(1,0,0,100)
+	UiModule.UIComponent.List(PlayersScroll).Padding = UDim.new(0, 12)
+	UiModule.UIComponent.Padding(PlayersScroll, 5, 5)
+	
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		local PlayerButton = UiModule.GuiObject.TextButton(PlayersScroll, `{Player.DisplayName} (@{Player.Name})`, `rbxthumb://type=AvatarHeadShot&id={Player.UserId}&w=420&h=420`)
+		PlayerButton.Name = Player.Name
+		
+		PlayerButton.MouseButton1Click:Connect(function()
+			if table.find(ChosenPlayers, Player) then
+				table.remove(ChosenPlayers, table.find(ChosenPlayers, Player))
+				
+				if PlayersScroll:FindFirstChild(Player.Name):FindFirstChildOfClass(`UIStroke`) then
+					for i, Stroke in pairs(PlayersScroll:FindFirstChild(Player.Name):GetChildren()) do
+						if Stroke:IsA(`UIStroke`) then
+							Stroke:Destroy()
+						end
+					end
+				end
+				
+			else
+				table.insert(ChosenPlayers, Player)
+
+				UiModule.UIComponent.Stroke(PlayerButton)
+			end
+		
+			TabName.Text =`<i>Кик игроков</i>: <b>{#ChosenPlayers}</b>`
+		end)
+	end
+	
+	local ChooseNonFriends = UiModule.GuiObject.TextButton(Tab, `Выбрать всех кроме друзей`, UiModule.Icons.Peoples)
+	
+	ChooseNonFriends.MouseButton1Click:Connect(function()
+		ChosenPlayers = {}
+		
+		for i, Player in pairs(game.Players:GetPlayers()) do
+			
+			if not PlayersScroll:FindFirstChild(Player.Name) then continue end
+
+			if Player:IsFriendsWithAsync(LocalPlr.UserId) == false then
+				
+				table.insert(ChosenPlayers, Player)
+				UiModule.UIComponent.Stroke(PlayersScroll:FindFirstChild(Player.Name))
+				
+			else
+								
+				if PlayersScroll:FindFirstChild(Player.Name):FindFirstChildOfClass(`UIStroke`) then
+					for i, Stroke in pairs(PlayersScroll:FindFirstChild(Player.Name):GetChildren()) do
+						if Stroke:IsA(`UIStroke`) then
+							Stroke:Destroy()
+						end
+					end
+				end
+				
+			end
+		end
+		
+		TabName.Text =`<i>Кик игроков</i>: <b>{#ChosenPlayers}</b>`
+
+	end)
+	
+	local ChooseAll = UiModule.GuiObject.TextButton(Tab, `Выбрать всех`, UiModule.Icons.TwoChecked)
+	
+	ChooseAll.MouseButton1Click:Connect(function()
+		ChosenPlayers = {}
+
+		for i, Player in pairs(game.Players:GetPlayers()) do
+
+			if not PlayersScroll:FindFirstChild(Player.Name) then continue end
+
+			if not PlayersScroll:FindFirstChild(Player.Name):FindFirstChildOfClass(`UIStroke`) then
+				UiModule.UIComponent.Stroke(PlayersScroll:FindFirstChild(Player.Name))
+			end
+			
+			table.insert(ChosenPlayers, Player)
+		end
+
+		TabName.Text =`<i>Кик игроков</i>: <b>{#ChosenPlayers}</b>`
+	end)
+	
+	
+	local Kick = UiModule.GuiObject.TextButton(Tab, `Кикнуть`, UiModule.Icons.Delete)
+	Kick.MouseButton1Click:Connect(function()
+		if #ChosenPlayers == 0 then return end
+		
+		for i, PlayerToKick in pairs(ChosenPlayers) do
+			if not game.Players:FindFirstChild(PlayerToKick.Name) then continue end
+			
+			WorkspaceRemotes.KickPlayerEvent:FireServer(PlayerToKick.Name)
+		end
+	end)
+
+end)
+
+
