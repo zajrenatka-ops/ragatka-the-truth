@@ -18,19 +18,14 @@ local InfoV2 = TweenInfo.new(.6, Enum.EasingStyle.Exponential, Enum.EasingDirect
 local InfoBoom = TweenInfo.new(.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
 local InfoBack = TweenInfo.new(.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
-local Player = game.Players.LocalPlayer
-local PlayerGui = Player.PlayerGui
-
---local DoSpam = false
---local DoSpamRemoteEvents = false
+local LocalPlayer = game.Players.LocalPlayer
+local PlayerGui = LocalPlayer.PlayerGui
 
 local BlacklistActive = true
 local AutoStopIfFeretanJoins = true
 local NotIfNewPlr = true
 
 local WhiteListMode = `отключён`
-
---local AfkMode = false
 
 local MainGui = Instance.new(`ScreenGui`)
 MainGui.Name = `Ragatka Gui Vision V2`
@@ -42,9 +37,38 @@ MainGui.Parent = PlayerGui
 
 local WorkspaceRemotes = workspace:WaitForChild(`EventsFolder`)
 
+local SoundsModule = {
+	hover = `rbxassetid://10066931761`,
+	click = `rbxassetid://10066968815`,
+	categoryClick = `rbxassetid://10128766965`,
+	warn = `rbxassetid://10066914500`,
+	notification = `rbxassetid://17582299860`,
+	vaznoe_notif = `rbxassetid://117409737658405`,
+}
+
+
+local SoundGroup = Instance.new(`SoundGroup`)
+SoundGroup.Name = `SFX_{script.Name}`
+SoundGroup.Parent = game:GetService(`SoundService`)
+
+function SoundsModule.PlaySound(SoundName:string)
+	local Sound = Instance.new(`Sound`)
+	Sound.SoundId = SoundName
+	Sound.Parent = SoundGroup
+	Sound:Play()
+	Debris:AddItem(Sound, Sound.TimeLength + 1)
+end
+
 local GuiModule = {}
 
-function GuiModule.Notificate(Text, icon, Time, to)
+function GuiModule.Notificate(Text, Sound, Time, to)
+	
+	if Sound == `` then
+		SoundsModule.PlaySound(SoundsModule.notification)
+	else
+		SoundsModule.PlaySound(Sound)
+	end
+	
 	local Notification = Instance.new(`ImageButton`)
 	Notification.AnchorPoint = Vector2.new(.5,.5)
 	
@@ -102,6 +126,8 @@ function GuiModule.Notificate(Text, icon, Time, to)
 	CountdownContainer.Size = UDim2.fromOffset(Label.AbsoluteSize.X, Label.AbsoluteSize.Y)
 
 	local function Close()
+		SoundsModule.PlaySound(SoundsModule.warn)
+		
 		TweenService:Create(Countdown, Info, {Size = UDim2.fromScale(0,1)}):Play()
 		TweenService:Create(Notification, Info, {Size = UDim2.fromOffset(40,40)}):Play()
 		TweenService:Create(Label, Info, {TextTransparency = 1}):Play()
@@ -176,12 +202,15 @@ function GuiModule.Button(guiObject)
 	local Stroke = GuiModule.Stroke(Button)
 
 	Button.MouseEnter:Connect(function()
+		
 		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(213, 213, 213)}):Play()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
 		TweenService:Create(Button, InfoBack, {BorderSizePixel = 5}):Play()
 	end)
 
 	Button.MouseLeave:Connect(function()
+		SoundsModule.PlaySound(SoundsModule.hover)
+
 		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
 		TweenService:Create(Button, InfoBack, {BorderSizePixel = 0}):Play()
@@ -332,6 +361,8 @@ local KillPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
 KillPlayersFrame.Visible = false
 
 KillPlayers.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+	
 	KillPlayersFrame.Visible = not KillPlayersFrame.Visible
 end)
 
@@ -360,10 +391,8 @@ Button_KillNonFriends.MouseButton1Click:Connect(function()
 
 	for i, Player in pairs(game.Players:GetPlayers()) do
 		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
-			print(`ТЫ ПЛОХОЕ`)
 			table.insert(NonCoolDudes, Player)
 		else
-			print(`ТЫ ХОРОШОЕ`)
 		end
 	end
 	
@@ -382,6 +411,8 @@ local Button_KillPlayer = GuiModule.Button(KillPlayersFrame)
 Button_KillPlayer.Text = `Определенного игрока`
 
 Button_KillPlayer.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+	
 	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
 		idk:Destroy()
 	end
@@ -452,6 +483,8 @@ local KickPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
 KickPlayersFrame.Visible = false
 
 KickPlayers.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+
 	KickPlayersFrame.Visible = not KickPlayersFrame.Visible
 end)
 
@@ -480,10 +513,8 @@ Button_KickNonFriends.MouseButton1Click:Connect(function()
 
 	for i, Player in pairs(game.Players:GetPlayers()) do
 		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
-			print(`ТЫ ПЛОХОЕ`)
 			table.insert(NonCoolDudes, Player)
 		else
-			print(`ТЫ ХОРОШОЕ`)
 		end
 	end
 
@@ -503,6 +534,8 @@ local Button_KickPlayer = GuiModule.Button(KickPlayersFrame)
 Button_KickPlayer.Text = `Определенного игрока`
 
 Button_KickPlayer.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+	
 	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
 		idk:Destroy()
 	end
@@ -573,6 +606,8 @@ local ServerBanFrame = GuiModule.AutoSizeFrame(Osnova)
 ServerBanFrame.Visible = false
 
 ServerBan.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+
 	ServerBanFrame.Visible = not ServerBanFrame.Visible
 end)
 
@@ -626,6 +661,8 @@ local Button_ServerBanPlayer = GuiModule.Button(ServerBanFrame)
 Button_ServerBanPlayer.Text = `Определенного игрока`
 
 Button_ServerBanPlayer.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
 		idk:Destroy()
 	end
@@ -697,6 +734,8 @@ local ServerUnBan = GuiModule.AutoSizeFrame(Osnova)
 ServerUnBan.Visible = false
 
 Button_ServerUnBan.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+
 	ServerUnBan.Visible = not ServerUnBan.Visible
 	
 	if ServerUnBan.Visible == false then return end
@@ -728,12 +767,16 @@ local UnServerBanButton = GuiModule.Button(ServerUnBan)
 UnServerBanButton.Text = `Разбанить`
 
 UnServerBanButton.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	table.remove(BlackListed, table.find(BlackListed, UnServerBanTextBox.Text))
 end)
 
 local UnServerBanEveryone = GuiModule.Button(ServerUnBan)
 UnServerBanEveryone.Text = `Разбанить всех`
 UnServerBanEveryone.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	BlackListed = {}
 end)
 
@@ -746,12 +789,16 @@ local Additional = GuiModule.AutoSizeFrame(Osnova)
 Additional.Visible = false
 
 Button_Additional.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+
 	Additional.Visible = not Additional.Visible
 end)
 
 local AutoStopOfFreJoinsBtn = GuiModule.Button(Additional)
 AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
 AutoStopOfFreJoinsBtn.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	BlacklistActive = not BlacklistActive
 	AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
 end)
@@ -759,6 +806,8 @@ end)
 local TellTheTruth = GuiModule.Button(Additional)
 TellTheTruth.Text = `Рассказать правду о игре`
 TellTheTruth.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	task.spawn(function()
 		while true do
 			for i, Player in pairs(game.Players:GetPlayers()) do
@@ -784,6 +833,8 @@ end)
 local AutoKickIfFerJoinsBtn = GuiModule.Button(Additional)
 AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
 AutoKickIfFerJoinsBtn.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	AutoKickIfFeretanJoins = not AutoKickIfFeretanJoins
 	AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
 end)
@@ -791,6 +842,8 @@ end)
 local NotifIfNewPlrBtn = GuiModule.Button(Additional)
 NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
 NotifIfNewPlrBtn.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
 	NotIfNewPlr = not NotIfNewPlr
 	NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
 end)
@@ -812,6 +865,8 @@ local Button_WhiteList = GuiModule.Button(Osnova)
 Button_WhiteList.Text = `🤍 Вайтлист: {WhiteListMode}`
 
 Button_WhiteList.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+
 	if WhiteListMode == `отключён` then
 		WhiteListMode = `только друзья`
 		
@@ -857,7 +912,20 @@ RagatkaGuiVision.MouseButton1Click:Connect(function()
 	end
 end)
 
+game.ContentProvider:PreloadAsync({
+	`rbxassetid://10066931761`,
+	`rbxassetid://10066968815`,
+	`rbxassetid://10128766965`,
+	`rbxassetid://10066914500`,
+})
 
+GuiModule.Notificate(`Загрузил все звуки для Ui!`, SoundsModule.vaznoe_notif, 5, Logs)
+
+for i, Player in pairs(game.Players:GetPlayers()) do
+	if Player.Name == `Feretanne` then
+		GuiModule.Notificate(`⚠️ Feretanne на сервере.`, ``, 30, Logs)
+	end
+end
 
 game.Players.PlayerAdded:Connect(function(Player)
 	
@@ -866,7 +934,7 @@ game.Players.PlayerAdded:Connect(function(Player)
 		if AutoKickIfFeretanJoins then
 			game.Players.LocalPlayer:Kick(`⚠️ Feretanne зашел на сервер. Все сервер-баны остановлены.`)
 		else
-			GuiModule.Notificate(`⚠️ Feretanne зашел на сервер. Статус автостопа сервер-банов: {BlacklistActive}`, ``, 30, Logs)
+			GuiModule.Notificate(`⚠️ Feretanne зашел на сервер. Статус автостопа сервер-банов: {BlacklistActive}`, SoundsModule.vaznoe_notif, 30, Logs)
 		end
 
 	end
@@ -897,8 +965,16 @@ game.Players.PlayerAdded:Connect(function(Player)
 end)
 
 
-game.Players.PlayerRemoving:Connect(function(Player)
+game.Players.PlayerRemoving:Connect(function(Player, Reason)
+	if Reason == Enum.PlayerExitReason.CreatorKick then
+		Reason = `Кикнут с помощью Ragatka Gui Vision v2.`
+	elseif Reason == Enum.PlayerExitReason.PlatformKick then
+		Reason = `Кикнут Roblox'ом.`
+	else
+		Reason = `Неизвестная причина.`
+	end
+
 	if NotIfNewPlr == true then
-		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
+		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера\nПричина: {Reason}`, ``, 5, Logs)
 	end
 end)
