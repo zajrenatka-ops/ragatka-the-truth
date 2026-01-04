@@ -1,0 +1,47 @@
+-- сервИзы
+
+local Tween = game:GetService(`TweenService`)
+
+local LocalPlr = game.Players.LocalPlayer
+local PlayerGui = LocalPlr.PlayerGui
+
+
+-- Модуль генерации Ui
+local UiModule = {
+	GuiObject = {},
+	UIComponent = {},
+}
+
+function UiModule.UIComponent.Corner(GuiObject:GuiObject, Radius:number)
+	local Component = Instance.new(`UICorner`)
+	Component.CornerRadius = UDim.new(0, Radius or 1)
+	Component.Parent = GuiObject
+	
+	return Component
+end
+
+function UiModule.UIComponent.Padding(GuiObject:GuiObject, PaddingRadius:number)
+	local Component = Instance.new(`UIPadding`)
+	Component.PaddingBottom = UDim.new(0, PaddingRadius or 15)
+	Component.PaddingLeft = UDim.new(0, PaddingRadius or 15)
+	Component.PaddingRight = UDim.new(0, PaddingRadius or 15)
+	Component.PaddingTop = UDim.new(0, PaddingRadius or 15)
+	Component.Parent = GuiObject
+
+	return Component
+end
+
+function UiModule.UIComponent.List(GuiObject:GuiObject, FillDirectrion:Enum.FillDirection)
+	local Component = Instance.new(`UIListLayout`)
+	Component.Padding = 5
+	Component.FillDirection = FillDirectrion or Enum.FillDirection.Vertical
+	Component.SortOrder = Enum.SortOrder.LayoutOrder
+	
+	return Component
+end
+
+
+function UiModule.GuiObject.AutoScaleFrame()
+	local Frame = Instance.new(`Frame`)
+	--Frame
+end
