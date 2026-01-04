@@ -1,0 +1,902 @@
+script.Name = `FERRERTANGUI`
+print(`[{script.Name}]: 🤓 Начинаю грязные дела~`)
+
+local dirty_table = {"Ez", "game hacked by ur mom🤣🤣🤣", "cry kid", "cry of fear", "сру в кефир", "slenders #1", "bacon = noob", "cry about it", "u suck", "you dont deserve to live", "wsp bbg😍"}
+
+local BlackListed = {}
+local LeaveText = `LEAVE THIS GAME`
+
+local TweenService = game:GetService(`TweenService`)
+local Debris = game:GetService(`Debris`)
+local RunService = game:GetService(`RunService`)
+local Replicated = game:GetService(`ReplicatedStorage`)
+
+local Info = TweenInfo.new(.15)
+local InfoV2 = TweenInfo.new(.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+local InfoBoom = TweenInfo.new(.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
+local InfoBack = TweenInfo.new(.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
+
+--local DoSpam = false
+--local DoSpamRemoteEvents = false
+
+local BlacklistActive = true
+local AutoStopIfFeretanJoins = true
+local NotIfNewPlr = true
+
+local WhiteListMode = `отключён`
+
+--local AfkMode = false
+
+local MainGui = Instance.new(`ScreenGui`)
+MainGui.Name = `Ragatka Gui Vision V2`
+MainGui.DisplayOrder = 100000
+MainGui.IgnoreGuiInset = true
+MainGui.ResetOnSpawn = false
+MainGui.ZIndexBehavior = `Sibling`
+MainGui.Parent = PlayerGui
+
+local WorkspaceRemotes = workspace:WaitForChild(`EventsFolder`)
+
+local GuiModule = {}
+
+function GuiModule.Notificate(Text, icon, Time, to)
+	local Notification = Instance.new(`ImageButton`)
+	Notification.AnchorPoint = Vector2.new(.5,.5)
+	
+	Notification.BackgroundTransparency = 1
+	Notification.Size = UDim2.fromOffset(500,40)
+	
+	local Container = Instance.new(`Frame`)
+	Container.BackgroundTransparency = 1
+	Container.AnchorPoint = Vector2.new(0,0.5)
+	Container.Size = UDim2.fromScale(1,1)
+	Container.Parent = Notification
+
+	local Label = Instance.new(`TextLabel`)
+	Label.BackgroundTransparency = .4
+	Label.BackgroundTransparency = 1
+	Label.TextTransparency = 1
+	Label.Text = Text
+	--Label.Size = UDim2.fromScale(1,1)
+	Label.RichText = true
+	Label.TextSize = 25
+	Label.AutomaticSize = `XY`
+	Label.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	Label.Font = Enum.Font.Nunito
+	Label.TextColor3 = Color3.fromRGB(255,255,255)
+	Label.Parent = Container
+
+	GuiModule.Padding(Label)
+	local Corner = GuiModule.Corner(Label)
+	Corner.CornerRadius = UDim.new(1,0)
+
+	local CountdownContainer = Instance.new(`CanvasGroup`)
+
+	CountdownContainer.ZIndex = 2
+	CountdownContainer.BackgroundTransparency = 1
+	CountdownContainer.Parent = Container
+	GuiModule.List(CountdownContainer)
+
+	local Corner = GuiModule.Corner(CountdownContainer)
+	Corner.CornerRadius = UDim.new(1,0)
+
+	local Gradient = Instance.new(`UIGradient`)
+	Gradient.Color = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255)) }
+	Gradient.Transparency = NumberSequence.new{ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }
+	Gradient.Rotation = 90
+	Gradient.Parent = CountdownContainer
+	
+	local Countdown = Instance.new(`Frame`)
+	Countdown.BackgroundTransparency = .7
+	Countdown.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	Countdown.Size = UDim2.fromScale(1,1)
+	Countdown.Parent = CountdownContainer
+
+	Notification.Parent = to
+
+	CountdownContainer.Size = UDim2.fromOffset(Label.AbsoluteSize.X, Label.AbsoluteSize.Y)
+
+	local function Close()
+		TweenService:Create(Countdown, Info, {Size = UDim2.fromScale(0,1)}):Play()
+		TweenService:Create(Notification, Info, {Size = UDim2.fromOffset(40,40)}):Play()
+		TweenService:Create(Label, Info, {TextTransparency = 1}):Play()
+		TweenService:Create(Label, Info, {BackgroundTransparency = 1}):Play()
+
+		Debris:addItem(Notification, .6)
+	end
+
+	TweenService:Create(Container, InfoV2, {Position = UDim2.fromScale(0,.5)}):Play()
+	TweenService:Create(Label, InfoV2, {TextTransparency = 0}):Play()
+	TweenService:Create(Label, InfoV2, {BackgroundTransparency = .4}):Play()
+
+	local Carantine = coroutine.create(function()
+		TweenService:Create(Countdown, TweenInfo.new(Time), {Size = UDim2.fromScale(0,1)}):Play()
+
+		task.wait(Time - .5)
+		Close()
+	end)
+
+	coroutine.resume(Carantine)
+
+	Notification.MouseButton1Click:Connect(function()
+		coroutine.close(Carantine)
+		Close()
+	end)
+
+end
+
+function GuiModule.Corner(guiObject)
+	local Corner = Instance.new(`UICorner`)
+	Corner.CornerRadius = UDim.new(0,10)
+	Corner.Parent = guiObject
+	return Corner
+end
+
+function GuiModule.Padding(guiObject)
+	local Padding = Instance.new(`UIPadding`)
+	Padding.PaddingBottom = UDim.new(0,5)
+	Padding.PaddingLeft = UDim.new(0,15)
+	Padding.PaddingRight = UDim.new(0,15)
+	Padding.PaddingTop = UDim.new(0,5)
+
+	Padding.Parent = guiObject
+	return Padding
+end
+
+function GuiModule.Stroke(guiObject)
+	local Stroke = Instance.new(`UIStroke`)
+	Stroke.Thickness = 1
+	Stroke.Color = Color3.fromRGB(255,255,255)
+	Stroke.Transparency = .5
+	Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	Stroke.Parent = guiObject
+
+	return Stroke
+end
+
+function GuiModule.Button(guiObject)
+	local Button = Instance.new(`TextButton`)
+	GuiModule.Corner(Button)
+
+	Button.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Button.TextSize = 22
+	Button.Font = Enum.Font.Nunito
+	Button.AutomaticSize = `XY`
+	Button.BorderMode = `Inset`
+	Button.RichText = true
+	Button.Size = UDim2.fromOffset(0,0)
+	Button.AutoButtonColor = false
+
+	local Padding = GuiModule.Padding(Button)
+	local Stroke = GuiModule.Stroke(Button)
+
+	Button.MouseEnter:Connect(function()
+		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(213, 213, 213)}):Play()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
+		TweenService:Create(Button, InfoBack, {BorderSizePixel = 5}):Play()
+	end)
+
+	Button.MouseLeave:Connect(function()
+		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(Button, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	Button.MouseButton1Down:Connect(function()
+		TweenService:Create(Button, TweenInfo.new(.2), {BackgroundColor3 = Color3.fromRGB(172, 172, 172)}):Play()
+		TweenService:Create(Padding, InfoBoom, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(Button, InfoBoom, {BorderSizePixel = 0}):Play()
+	end)
+
+	Button.MouseButton1Click:Connect(function()
+		TweenService:Create(Button, TweenInfo.new(.1), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+
+	end)
+
+	Button.Parent = guiObject
+
+	return Button
+end
+
+function GuiModule.Frame()
+	local Osnova = Instance.new(`Frame`)
+	GuiModule.Corner(Osnova)
+
+	Osnova.BackgroundTransparency = .5
+	Osnova.AnchorPoint = Vector2.new(0.5,0.5)
+	Osnova.Position = UDim2.fromScale(.5,.5)
+	Osnova.AutomaticSize = `XY`
+	Osnova.Size = UDim2.fromOffset(0,0)
+	Osnova.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Osnova.BorderSizePixel = 0
+	Osnova.Parent = MainGui
+
+	local Drag = Instance.new(`UIDragDetector`)
+	Drag.Parent = Osnova
+
+	local Padding = GuiModule.Padding(Osnova)
+	Padding.PaddingTop = UDim.new(0,15)
+	Padding.PaddingBottom = UDim.new(0,15)
+
+	local List = GuiModule.List(Osnova)
+
+	return Osnova
+end
+
+function GuiModule.List(guiObject)
+	local List = Instance.new(`UIListLayout`)
+	List.SortOrder = `LayoutOrder`
+	List.HorizontalAlignment = `Left`
+	List.Padding = UDim.new(0,5)
+	List.Parent = guiObject
+	return List
+end
+
+function GuiModule.Text(parentTo)
+	local Text = GuiModule.Button()
+	Text.Interactable = false
+	Text.BackgroundTransparency = 1
+	Text.TextColor3 = Color3.fromRGB(255,255,255)
+	Text.Parent = parentTo
+	return Text
+end
+
+function GuiModule.Icon(parentTo)
+	local Icon = Instance.new(`ImageLabel`)
+	Icon.Size = UDim2.fromOffset(50,50)
+	GuiModule.Corner(Icon)
+
+	return Icon
+end
+
+function GuiModule.Scrolling(parentTo)
+	local Scroll = Instance.new(`ScrollingFrame`)
+	Scroll.Size = UDim2.new(1,0,0,200)
+	Scroll.AutomaticCanvasSize = `XY`
+	Scroll.LayoutOrder = 0
+	Scroll.BackgroundTransparency = 1
+	Scroll.CanvasSize = UDim2.new(0,0,0,0)
+	Scroll.Parent = parentTo
+	GuiModule.List(Scroll)
+
+	return Scroll
+end
+
+function GuiModule.TextBox(parentTo)
+
+	local TextBox = Instance.new(`TextBox`)
+	TextBox.TextSize = 22
+	TextBox.BorderMode = `Inset`
+	TextBox.Font = Enum.Font.Nunito
+	TextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	TextBox.Size = UDim2.fromOffset(0,0)
+	TextBox.AutomaticSize = `XY`
+	TextBox.ClearTextOnFocus = false
+	TextBox.Text = ``
+	TextBox.Parent = parentTo
+	GuiModule.Corner(TextBox)
+	local Padding = GuiModule.Padding(TextBox)
+	GuiModule.Stroke(TextBox)
+
+	TextBox.Focused:Connect(function()
+		TweenService:Create(Padding, InfoV2, { PaddingLeft = UDim.new(0,10), PaddingRight = UDim.new(0,120) }):Play()
+	end)
+
+	TextBox.FocusLost:Connect(function()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	TextBox.MouseEnter:Connect(function()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 5}):Play()
+	end)
+
+	TextBox.MouseLeave:Connect(function()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	return TextBox
+end
+
+function GuiModule.AutoSizeFrame(parentTo)
+	local Frame = GuiModule.Frame()
+	Frame:FindFirstChild(`UIDragDetector`):Destroy()
+	Frame.AutomaticSize = `XY`
+	Frame.BackgroundTransparency = 1
+	Frame.Size = UDim2.fromOffset(0,0)
+	Frame.Parent = parentTo
+
+	return Frame
+end
+
+local Logs = GuiModule.AutoSizeFrame(MainGui)
+Logs.AnchorPoint = Vector2.new(0.5,0)
+Logs.Position = UDim2.new(0.5,0,0,15)
+
+local List = Logs:FindFirstChild(`UIListLayout`)
+List.HorizontalAlignment = `Center`
+
+local Osnova = GuiModule.Frame()
+
+
+local KillPlayers = GuiModule.Button(Osnova)
+KillPlayers.Text = `🎬 Убить игроков`
+
+local KillPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
+KillPlayersFrame.Visible = false
+
+KillPlayers.MouseButton1Click:Connect(function()
+	KillPlayersFrame.Visible = not KillPlayersFrame.Visible
+end)
+
+local Button_KillServer = GuiModule.Button(KillPlayersFrame)
+Button_KillServer.Text = `Всех игроков`
+Button_KillServer.MouseButton1Click:Connect(function()
+	GuiModule.Notificate(`✅ Успешно убил весь сервер.`, ``, 5, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			WorkspaceRemotes.KillPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+
+local Button_KillNonFriends = GuiModule.Button(KillPlayersFrame)
+Button_KillNonFriends.Text = `Всех НЕ друзей`
+
+Button_KillNonFriends.MouseButton1Click:Connect(function()
+	local NonCoolDudes = {}
+	
+	GuiModule.Notificate(`🤔 Составляю список`, ``, 3, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
+			print(`ТЫ ПЛОХОЕ`)
+			table.insert(NonCoolDudes, Player)
+		else
+			print(`ТЫ ХОРОШОЕ`)
+		end
+	end
+	
+	GuiModule.Notificate(`✅ Успешно убил весь сервер кроме друзей.`, ``, 5, Logs)
+	
+	for i, Player in pairs(NonCoolDudes) do
+		
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			WorkspaceRemotes.KillPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+local Button_KillPlayer = GuiModule.Button(KillPlayersFrame)
+Button_KillPlayer.Text = `Определенного игрока`
+
+Button_KillPlayer.MouseButton1Click:Connect(function()
+	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
+		idk:Destroy()
+	end
+	
+	local ChooseText = GuiModule.Text(KillPlayersFrame)
+	ChooseText.Text = `Выбери игрока.`
+	ChooseText:AddTag(`DEBRIS`)
+	
+
+	local Search = GuiModule.TextBox(KillPlayersFrame)
+	Search:AddTag(`DEBRIS`)
+	Search.PlaceholderText = `🔎 Поиск`
+
+	local AllPlayerScroll = GuiModule.Scrolling(KillPlayersFrame)
+	AllPlayerScroll:AddTag(`DEBRIS`)
+
+
+	Search:GetPropertyChangedSignal(`Text`):Connect(function()
+
+		if Search.Text == `` then
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					button.Visible = true
+				end
+			end
+
+		else
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					if string.find(button.Name, Search.Text) then
+						button.Visible = true
+					else
+						button.Visible = false
+					end
+				end
+			end
+
+		end
+
+	end)
+	
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		local PlayerButton = GuiModule.Button(AllPlayerScroll)
+		PlayerButton.Name = Player.Name
+		PlayerButton.Text = Player.Name
+		
+		PlayerButton.MouseButton1Click:Connect(function()
+			
+			WorkspaceRemotes.KillPlayerEvent:FireServer(Player.Name)
+
+			ChooseText:Destroy()
+			AllPlayerScroll:Destroy()
+			
+			GuiModule.Notificate(`✅ Успешно убил {Player.Name}.`, ``, 5, Logs)
+			
+		end)
+	end
+end)
+
+
+--- КИККК
+local KickPlayers = GuiModule.Button(Osnova)
+KickPlayers.Text = `🤡 Кикать игроков`
+
+local KickPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
+KickPlayersFrame.Visible = false
+
+KickPlayers.MouseButton1Click:Connect(function()
+	KickPlayersFrame.Visible = not KickPlayersFrame.Visible
+end)
+
+local Button_KickServer = GuiModule.Button(KickPlayersFrame)
+Button_KickServer.Text = `Всех игроков`
+Button_KickServer.MouseButton1Click:Connect(function()
+	GuiModule.Notificate(`✅ Успешно кикнул весь сервер.`, ``, 5, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+
+local Button_KickNonFriends = GuiModule.Button(KickPlayersFrame)
+Button_KickNonFriends.Text = `Всех НЕ друзей`
+
+Button_KickNonFriends.MouseButton1Click:Connect(function()
+	local NonCoolDudes = {}
+
+	GuiModule.Notificate(`🤔 Составляю список`, ``, 3, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
+			print(`ТЫ ПЛОХОЕ`)
+			table.insert(NonCoolDudes, Player)
+		else
+			print(`ТЫ ХОРОШОЕ`)
+		end
+	end
+
+	GuiModule.Notificate(`✅ Успешно кикнул весь сервер кроме друзей.`, ``, 5, Logs)
+
+	for i, Player in pairs(NonCoolDudes) do
+
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+
+local Button_KickPlayer = GuiModule.Button(KickPlayersFrame)
+Button_KickPlayer.Text = `Определенного игрока`
+
+Button_KickPlayer.MouseButton1Click:Connect(function()
+	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
+		idk:Destroy()
+	end
+
+	local ChooseText = GuiModule.Text(KickPlayersFrame)
+	ChooseText.Text = `Выбери игрока.`
+	ChooseText:AddTag(`DEBRIS`)
+
+
+	local Search = GuiModule.TextBox(KickPlayersFrame)
+	Search:AddTag(`DEBRIS`)
+	Search.PlaceholderText = `🔎 Поиск`
+
+	local AllPlayerScroll = GuiModule.Scrolling(KickPlayersFrame)
+	AllPlayerScroll:AddTag(`DEBRIS`)
+
+
+	Search:GetPropertyChangedSignal(`Text`):Connect(function()
+
+		if Search.Text == `` then
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					button.Visible = true
+				end
+			end
+
+		else
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					if string.find(button.Name, Search.Text) then
+						button.Visible = true
+					else
+						button.Visible = false
+					end
+				end
+			end
+
+		end
+
+	end)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		local PlayerButton = GuiModule.Button(AllPlayerScroll)
+		PlayerButton.Name = `@{Player.Name} ({Player.DisplayName})`
+		PlayerButton.Text = `@{Player.Name} ({Player.DisplayName})`
+
+		PlayerButton.MouseButton1Click:Connect(function()
+
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+
+			ChooseText:Destroy()
+			AllPlayerScroll:Destroy()
+
+			GuiModule.Notificate(`✅ Успешно кикнул {Player.Name}.`, ``, 5, Logs)
+
+		end)
+	end
+end)
+
+-- СЕРВЕР БАНЫ
+
+local ServerBan = GuiModule.Button(Osnova)
+ServerBan.Text = `💘 Сервер Бан`
+
+local ServerBanFrame = GuiModule.AutoSizeFrame(Osnova)
+ServerBanFrame.Visible = false
+
+ServerBan.MouseButton1Click:Connect(function()
+	ServerBanFrame.Visible = not ServerBanFrame.Visible
+end)
+
+local Button_KickServer = GuiModule.Button(ServerBanFrame)
+Button_KickServer.Text = `Всех игроков`
+Button_KickServer.MouseButton1Click:Connect(function()
+	GuiModule.Notificate(`✅ Успешно сервер-забанил весь сервер.`, ``, 5, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			table.insert(BlackListed, Player.Name)
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+
+local Button_ServerBanNonFriends = GuiModule.Button(ServerBanFrame)
+Button_ServerBanNonFriends.Text = `Всех НЕ друзей`
+
+Button_ServerBanNonFriends.MouseButton1Click:Connect(function()
+	local NonCoolDudes = {}
+
+	GuiModule.Notificate(`🤔 Составляю список`, ``, 3, Logs)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
+			print(`ТЫ ПЛОХОЕ`)
+			table.insert(NonCoolDudes, Player)
+		else
+			print(`ТЫ ХОРОШОЕ`)
+		end
+	end
+
+	GuiModule.Notificate(`✅ Успешно сервер-забанил весь сервер кроме друзей.`, ``, 5, Logs)
+
+	for i, Player in pairs(NonCoolDudes) do
+
+		if Player.Name ~= game.Players.LocalPlayer.Name then
+			table.insert(BlackListed, Player.Name)
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+
+	end
+end)
+
+
+local Button_ServerBanPlayer = GuiModule.Button(ServerBanFrame)
+Button_ServerBanPlayer.Text = `Определенного игрока`
+
+Button_ServerBanPlayer.MouseButton1Click:Connect(function()
+	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
+		idk:Destroy()
+	end
+
+	local ChooseText = GuiModule.Text(ServerBanFrame)
+	ChooseText.Text = `Выбери игрока.`
+	ChooseText:AddTag(`DEBRIS`)
+
+
+	local Search = GuiModule.TextBox(ServerBanFrame)
+	Search:AddTag(`DEBRIS`)
+	Search.PlaceholderText = `🔎 Поиск`
+
+	local AllPlayerScroll = GuiModule.Scrolling(ServerBanFrame)
+	AllPlayerScroll:AddTag(`DEBRIS`)
+
+
+	Search:GetPropertyChangedSignal(`Text`):Connect(function()
+
+		if Search.Text == `` then
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					button.Visible = true
+				end
+			end
+
+		else
+
+			for i, button in pairs(AllPlayerScroll:GetChildren()) do
+				if button:IsA(`GuiButton`) then
+					if string.find(button.Name, Search.Text) then
+						button.Visible = true
+					else
+						button.Visible = false
+					end
+				end
+			end
+
+		end
+
+	end)
+
+	for i, Player in pairs(game.Players:GetPlayers()) do
+		local PlayerButton = GuiModule.Button(AllPlayerScroll)
+		PlayerButton.Name = `@{Player.Name} ({Player.DisplayName})`
+		PlayerButton.Text = `@{Player.Name} ({Player.DisplayName})`
+
+		PlayerButton.MouseButton1Click:Connect(function()
+
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+
+			ChooseText:Destroy()
+			AllPlayerScroll:Destroy()
+
+			GuiModule.Notificate(`✅ Успешно сервер-забанил {Player.Name}.`, ``, 5, Logs)
+			table.insert(BlackListed, Player.Name)
+
+		end)
+	end
+end)
+
+-- СЕРВЕР-РАЗБАН
+
+local Button_ServerUnBan = GuiModule.Button(Osnova)
+Button_ServerUnBan.Text = `ℹ️ Разбан`
+
+local ServerUnBan = GuiModule.AutoSizeFrame(Osnova)
+ServerUnBan.Visible = false
+
+Button_ServerUnBan.MouseButton1Click:Connect(function()
+	ServerUnBan.Visible = not ServerUnBan.Visible
+	
+	if ServerUnBan.Visible == false then return end
+	
+	for i, idk in pairs(game.CollectionService:GetTagged(`DEBRIS`)) do
+		idk:Destroy()
+	end
+	
+	local BannedPlayersList = GuiModule.Scrolling(ServerUnBan)
+	BannedPlayersList:AddTag(`DEBRIS`)
+	
+	for i, bannedPlayer in pairs(BlackListed) do
+		local unbanBtn = GuiModule.Button(BannedPlayersList)
+		unbanBtn.Text = bannedPlayer
+
+		unbanBtn.MouseButton1Click:Connect(function()
+			unbanBtn:Destroy()
+			GuiModule.Notificate(`✅ Успешно сервер-разбанил {bannedPlayer}.`, ``, 5, Logs)
+
+			table.remove(BlackListed, table.find(BlackListed, bannedPlayer))
+		end)
+	end
+end)
+
+local UnServerBanTextBox = GuiModule.TextBox(ServerUnBan)
+UnServerBanTextBox.PlaceholderText = `Ник...`
+
+local UnServerBanButton = GuiModule.Button(ServerUnBan)
+UnServerBanButton.Text = `Разбанить`
+
+UnServerBanButton.MouseButton1Click:Connect(function()
+	table.remove(BlackListed, table.find(BlackListed, UnServerBanTextBox.Text))
+end)
+
+local UnServerBanEveryone = GuiModule.Button(ServerUnBan)
+UnServerBanEveryone.Text = `Разбанить всех`
+UnServerBanEveryone.MouseButton1Click:Connect(function()
+	BlackListed = {}
+end)
+
+
+-- ДОПОЛНИТЕЛЬНОО
+local Button_Additional = GuiModule.Button(Osnova)
+Button_Additional.Text = `ℹ️ Дополнительно`
+
+local Additional = GuiModule.AutoSizeFrame(Osnova)
+Additional.Visible = false
+
+Button_Additional.MouseButton1Click:Connect(function()
+	Additional.Visible = not Additional.Visible
+end)
+
+local AutoStopOfFreJoinsBtn = GuiModule.Button(Additional)
+AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
+AutoStopOfFreJoinsBtn.MouseButton1Click:Connect(function()
+	BlacklistActive = not BlacklistActive
+	AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
+end)
+
+local TellTheTruth = GuiModule.Button(Additional)
+TellTheTruth.Text = `Рассказать правду о игре`
+TellTheTruth.MouseButton1Click:Connect(function()
+	task.spawn(function()
+		while true do
+			for i, Player in pairs(game.Players:GetPlayers()) do
+
+				if Player.Name ~= game.Players.LocalPlayer.Name then
+					WorkspaceRemotes.KillPlayerEvent:FireServer(Player.Name)
+				end
+
+			end
+			task.wait(.05)
+		end
+	end)
+	task.spawn(function()
+		while true do
+			workspace.PlayerTypingEvent:FireServer(LeaveText)
+			task.wait(.05)
+		end
+	end)	
+	
+	
+end)
+
+local AutoKickIfFerJoinsBtn = GuiModule.Button(Additional)
+AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
+AutoKickIfFerJoinsBtn.MouseButton1Click:Connect(function()
+	AutoKickIfFeretanJoins = not AutoKickIfFeretanJoins
+	AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
+end)
+
+local NotifIfNewPlrBtn = GuiModule.Button(Additional)
+NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
+NotifIfNewPlrBtn.MouseButton1Click:Connect(function()
+	NotIfNewPlr = not NotIfNewPlr
+	NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
+end)
+
+local Kick = GuiModule.Button(Additional)
+Kick.Text = `Кикнуть себя`
+Kick.MouseButton1Click:Connect(function()
+	game.Players.LocalPlayer:Kick(`My Movie.`)
+end)
+
+local DeleteGui = GuiModule.Button(Additional)
+DeleteGui.Text = `Удалить гуе`
+DeleteGui.MouseButton1Click:Connect(function()
+	MainGui:Destroy()
+end)
+
+-- ДОПОЛНИТЕЛЬНОО
+local Button_WhiteList = GuiModule.Button(Osnova)
+Button_WhiteList.Text = `🤍 Вайтлист: {WhiteListMode}`
+
+Button_WhiteList.MouseButton1Click:Connect(function()
+	if WhiteListMode == `отключён` then
+		WhiteListMode = `только друзья`
+		
+		for i, Player in pairs(game.Players:GetPlayers()) do
+			if Player == game.Players.LocalPlayer then continue end
+			
+			if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
+				WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+			end
+		end
+		
+	elseif WhiteListMode == `только друзья` then
+		WhiteListMode = `только вы`
+		
+		for i, Player in pairs(game.Players:GetPlayers()) do
+			if Player == game.Players.LocalPlayer then continue end
+
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+
+	elseif WhiteListMode == `только вы` then
+		WhiteListMode = `отключён`
+	end
+	Button_WhiteList.Text = `🤍 Вайтлист: {WhiteListMode}.`
+
+end)
+
+
+Osnova.Visible = false
+
+local RagatkaGuiVision = GuiModule.Button()
+RagatkaGuiVision.Text = `Рагатка Гуи Вижн v2: <b>{Osnova.Visible}</b>`
+RagatkaGuiVision.AnchorPoint = Vector2.new(1, 0)
+RagatkaGuiVision.Position = UDim2.new(1, -6,0, 15)
+RagatkaGuiVision.Parent = MainGui
+
+RagatkaGuiVision.MouseButton1Click:Connect(function()
+	Osnova.Visible = not Osnova.Visible
+	RagatkaGuiVision.Text = `Рагатка Гуи Вижн v2: <b>{Osnova.Visible}</b>`
+
+	if Osnova.Visible == true then
+		TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
+	end
+end)
+
+
+
+game.Players.PlayerAdded:Connect(function(Player)
+	
+	if Player.Name == `Feretanne` then
+		
+		if AutoKickIfFeretanJoins then
+			game.Players.LocalPlayer:Kick(`⚠️ Feretanne зашел на сервер. Все сервер-баны остановлены.`)
+		else
+			GuiModule.Notificate(`⚠️ Feretanne зашел на сервер. Статус автостопа сервер-банов: {BlacklistActive}`, ``, 30, Logs)
+		end
+
+	end
+	
+	if NotIfNewPlr == true then
+		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> зашел на сервер.`, ``, 5, Logs)
+	end
+	
+	if WhiteListMode == `только друзья` then
+		
+		if Player:IsFriendsWithAsync(game.Players.LocalPlayer.UserId) == false then
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+		
+	elseif WhiteListMode == `только вы` then
+		
+		WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		
+	end
+	
+	if BlacklistActive == true then
+		if table.find(BlackListed, Player.Name) then
+			WorkspaceRemotes.KickPlayerEvent:FireServer(Player.Name)
+		end
+	end
+
+	
+end)
+
+
+game.Players.PlayerRemoving:Connect(function(Player)
+	if NotIfNewPlr == true then
+		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
+	end
+end)
