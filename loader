@@ -3,6 +3,8 @@ print(`[{script.Name}]: 🤓 Начинаю грязные дела~`)
 
 local dirty_table = {"Ez", "game hacked by ur mom🤣🤣🤣", "cry kid", "cry of fear", "сру в кефир", "slenders #1", "bacon = noob", "cry about it", "u suck", "you dont deserve to live", "wsp bbg😍"}
 
+local Github = `https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/`
+
 local BlackListed = {}
 local LeaveText = `LEAVE THIS GAME`
 
@@ -1029,44 +1031,73 @@ end)
 
 
 Osnova.Visible = false
-
-local RagatkaGuiVision = GuiModule.Button()
-RagatkaGuiVision.Text = `Рагатка Гуи Вижн v2: <b>{Osnova.Visible}</b>`
-RagatkaGuiVision.AnchorPoint = Vector2.new(1, 0)
-RagatkaGuiVision.Position = UDim2.new(1, -6,0, 15)
-RagatkaGuiVision.Parent = MainGui
-
-RagatkaGuiVision.MouseButton1Click:Connect(function()
-	Osnova.Visible = not Osnova.Visible
-	if game:GetService(`RunService`):IsStudio() then
-		RagatkaGuiVision.Text = `Studio Test: <b>{Osnova.Visible}</b>`
-	else
-		RagatkaGuiVision.Text = `Ragatka Gui Vision v{loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()} <b>{Osnova.Visible}</b>`
-	end
-
-	if Osnova.Visible == true then
-		TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
-	end
-end)
+GuiModule.Notificate(`🔃 Загружаем ассеты... Будь готов!`, ``, 5, Logs)
 
 game.ContentProvider:PreloadAsync({
 	`rbxassetid://10066931761`,
 	`rbxassetid://10066968815`,
 	`rbxassetid://10128766965`,
 	`rbxassetid://10066914500`,
+	`rbxassetid://81407492803207`,
 })
+
+local VisionVersion
+	
+if game:GetService(`RunService`):IsStudio() then
+	VisionVersion = -1
+else
+	VisionVersion = loadstring(game:HttpGet(`{Github}versionnumber`))()
+end
+
+local Welcome = GuiModule.AutoSizeFrame(MainGui)
+local WelcomeText = GuiModule.Text(Welcome)
+WelcomeText.Text = `Ragatka Gui Vision: Version v{VisionVersion}`
+local WelcomeIcon = GuiModule.Icon(Welcome, `rbxassetid://81407492803207`)
+WelcomeIcon.ImageTransparency = 1
+WelcomeIcon.ImageColor3 = Color3.fromRGB(255,255,255)
+GuiModule.Corner(WelcomeIcon)
+WelcomeIcon.Size = UDim2.fromOffset(350,350)
+TweenService:Create(WelcomeIcon, Info, {ImageTransparency = 0}):Play()
+task.wait(Info.DelayTime + 2)
+TweenService:Create(WelcomeIcon, Info, {ImageTransparency = 1}):Play()
+task.wait(Info.DelayTime + 1)
+Welcome:Destroy()
+
+
+local RagatkaGuiVision = GuiModule.Button()
+RagatkaGuiVision.Text = `Ragatka Gui Vision v{VisionVersion}: <b>{Osnova.Visible}</b>`
+RagatkaGuiVision.AnchorPoint = Vector2.new(1, 0)
+RagatkaGuiVision.Position = UDim2.new(1, -6,0, 15)
+RagatkaGuiVision.Parent = MainGui
+
+RagatkaGuiVision.MouseButton1Click:Connect(function()
+	Osnova.Visible = not Osnova.Visible
+	RagatkaGuiVision.Text = `Ragatka Gui Vision v{VisionVersion}: <b>{Osnova.Visible}</b>`
+
+	if Osnova.Visible == true then
+		TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
+	end
+end)
+
 
 
 for i, Player in pairs(game.Players:GetPlayers()) do
 	if Player.Name == `Feretanne` then
 		GuiModule.Notificate(`⚠️ Feretanne на сервере.`, ``, 30, Logs)
+		break
 	end
 end
+
+local RandomTip = {
+	`сейчас на сервере <i>{#game.Players:GetPlayers()}</i> игроков.`,
+	`автообновление включено. <b><i>BETA</i></b>`,
+	`в игре Feretanne есть античит, по похоже он не работает =)`,
+}
 
 if game.PlaceId ~= 114637499948937 then
 	GuiModule.Notificate(`ℹ️ Ты не в плейсе @Feretanne.`, ``, 15, Logs)
 else
-	GuiModule.Notificate(`✅ Загрузка завершена! Автообновление включено. <b><i>BETA</i></b>`, ``,  5, Logs)
+	GuiModule.Notificate(`✅ Добро пожаловать!\nЗнал ли ты: {RandomTip[math.random(1, #RandomTip)]}`, ``,  5, Logs)
 end
 
 
@@ -1122,18 +1153,15 @@ end)
 
 if game:GetService(`RunService`):IsStudio() == false then
 	task.defer(function()
-		local VisionVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
 
 		while true do
 			local NewVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
 			
-			print(`Текущая версия: {VisionVersion}; Новая версия: {NewVersion}`)
-
 			
 			if VisionVersion ~= NewVersion then
-				GuiModule.Notificate(`Доступна новая версия Ragatka Gui Vision: <b>{NewVersion}</b>\nОбновиться можно в главном меню`, ``, 120, Logs)
+				GuiModule.Notificate(`Доступна новая версия Ragatka Gui Vision.\nОбновиться можно в главном меню`, ``, 120, Logs)
 				local UpdateButton = GuiModule.Button(Osnova, GuiModule.Icons.Update)
-				UpdateButton.Text = `<b>Обновление до версии <i>{NewVersion}</i></b>.`
+				UpdateButton.Text = `<b>Обновление до <i>новой версии</i></b>.`
 				UpdateButton:FindFirstChildOfClass(`UIGradient`).Color = ColorSequence.new({
 					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 230)),
 					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 136))
@@ -1155,5 +1183,3 @@ if game:GetService(`RunService`):IsStudio() == false then
 		
 	end)
 end
-
-
