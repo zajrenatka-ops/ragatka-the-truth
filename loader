@@ -8,6 +8,7 @@ local dirty_table = {"Ez", "game hacked by ur mom🤣🤣🤣", "cry kid", "cry 
 local BlackListed = {}
 local LeaveText = `LEAVE THIS FUCKING GAME`
 
+
 local TweenService = game:GetService(`TweenService`)
 local Debris = game:GetService(`Debris`)
 local RunService = game:GetService(`RunService`)
@@ -61,100 +62,6 @@ end
 
 local GuiModule = {}
 
-function GuiModule.Notificate(Text, Sound, Time, to)
-	
-	if Sound == `` then
-		SoundsModule.PlaySound(SoundsModule.notification)
-	else
-		SoundsModule.PlaySound(Sound)
-	end
-	
-	local Notification = Instance.new(`ImageButton`)
-	Notification.AnchorPoint = Vector2.new(.5,.5)
-	
-	Notification.BackgroundTransparency = 1
-	Notification.Size = UDim2.fromOffset(500,40)
-	
-	local Container = Instance.new(`Frame`)
-	Container.BackgroundTransparency = 1
-	Container.AnchorPoint = Vector2.new(0,0.5)
-	Container.Size = UDim2.fromScale(1,1)
-	Container.Parent = Notification
-
-	local Label = Instance.new(`TextLabel`)
-	Label.BackgroundTransparency = .4
-	Label.BackgroundTransparency = 1
-	Label.TextTransparency = 1
-	Label.Text = Text
-	--Label.Size = UDim2.fromScale(1,1)
-	Label.RichText = true
-	Label.TextSize = 25
-	Label.AutomaticSize = `XY`
-	Label.BackgroundColor3 = Color3.fromRGB(0,0,0)
-	Label.Font = Enum.Font.Nunito
-	Label.TextColor3 = Color3.fromRGB(255,255,255)
-	Label.Parent = Container
-
-	GuiModule.Padding(Label)
-	local Corner = GuiModule.Corner(Label)
-	Corner.CornerRadius = UDim.new(1,0)
-
-	local CountdownContainer = Instance.new(`CanvasGroup`)
-
-	CountdownContainer.ZIndex = 2
-	CountdownContainer.BackgroundTransparency = 1
-	CountdownContainer.Parent = Container
-	GuiModule.List(CountdownContainer)
-
-	local Corner = GuiModule.Corner(CountdownContainer)
-	Corner.CornerRadius = UDim.new(1,0)
-
-	local Gradient = Instance.new(`UIGradient`)
-	Gradient.Color = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255)) }
-	Gradient.Transparency = NumberSequence.new{ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }
-	Gradient.Rotation = 90
-	Gradient.Parent = CountdownContainer
-	
-	local Countdown = Instance.new(`Frame`)
-	Countdown.BackgroundTransparency = .7
-	Countdown.BackgroundColor3 = Color3.fromRGB(0,0,0)
-	Countdown.Size = UDim2.fromScale(1,1)
-	Countdown.Parent = CountdownContainer
-
-	Notification.Parent = to
-
-	CountdownContainer.Size = UDim2.fromOffset(Label.AbsoluteSize.X, Label.AbsoluteSize.Y)
-
-	local function Close()
-		SoundsModule.PlaySound(SoundsModule.warn)
-		
-		TweenService:Create(Countdown, Info, {Size = UDim2.fromScale(0,1)}):Play()
-		TweenService:Create(Notification, Info, {Size = UDim2.fromOffset(40,40)}):Play()
-		TweenService:Create(Label, Info, {TextTransparency = 1}):Play()
-		TweenService:Create(Label, Info, {BackgroundTransparency = 1}):Play()
-
-		Debris:addItem(Notification, .6)
-	end
-
-	TweenService:Create(Container, InfoV2, {Position = UDim2.fromScale(0,.5)}):Play()
-	TweenService:Create(Label, InfoV2, {TextTransparency = 0}):Play()
-	TweenService:Create(Label, InfoV2, {BackgroundTransparency = .4}):Play()
-
-	local Carantine = coroutine.create(function()
-		TweenService:Create(Countdown, TweenInfo.new(Time), {Size = UDim2.fromScale(0,1)}):Play()
-
-		task.wait(Time - .5)
-		Close()
-	end)
-
-	coroutine.resume(Carantine)
-
-	Notification.MouseButton1Click:Connect(function()
-		coroutine.close(Carantine)
-		Close()
-	end)
-
-end
 
 function GuiModule.Corner(guiObject)
 	local Corner = Instance.new(`UICorner`)
@@ -183,6 +90,56 @@ function GuiModule.Stroke(guiObject)
 	Stroke.Parent = guiObject
 
 	return Stroke
+end
+
+function GuiModule.Notificate(Text:string, Sound, Time:number, to)
+	
+	if Sound == `` or Sound == nil then
+		SoundsModule.PlaySound(SoundsModule.notification)
+	else
+		SoundsModule.PlaySound(Sound)
+	end
+	
+	local Notif = Instance.new(`TextButton`)
+	Notif.Size = UDim2.fromScale(0,0)
+	Notif.TextSize = 20
+	Notif.Font = Enum.Font.Nunito
+	Notif.AutomaticSize = `XY`
+	Notif.Parent = to
+	Notif.TextColor3 = Color3.fromRGB(255,255,255)
+	Notif.BackgroundTransparency = 1
+	Notif.TextTransparency = 1
+	Notif.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	
+	GuiModule.Padding(Notif)
+	GuiModule.Corner(Notif).CornerRadius = UDim.new(1,0)
+
+	task.defer(function()
+		for i = 0, #Text do
+			Notif.Text = string.sub(Text, 1, i)
+			task.wait(.01)
+		end
+	end)
+
+	local function Close()
+		TweenService:Create(Notif, InfoV2, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+		Debris:AddItem(Notif, .5)
+	end
+	
+	local Carantine = coroutine.create(function()
+		TweenService:Create(Notif, InfoV2, {BackgroundTransparency = .5, TextTransparency = 0}):Play()
+
+		task.wait(Time - .5)
+		Close()
+	end)
+
+	coroutine.resume(Carantine)
+
+	Notif.MouseButton1Click:Connect(function()
+		coroutine.close(Carantine)
+		Close()
+	end)
+
 end
 
 function GuiModule.Button(guiObject)
@@ -345,11 +302,33 @@ function GuiModule.AutoSizeFrame(parentTo)
 end
 
 local Logs = GuiModule.AutoSizeFrame(MainGui)
+Logs.Name = `Logs`
 Logs.AnchorPoint = Vector2.new(0.5,0)
 Logs.Position = UDim2.new(0.5,0,0,15)
 
 local List = Logs:FindFirstChild(`UIListLayout`)
 List.HorizontalAlignment = `Center`
+
+local Visions = 0
+
+for i, Gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+	if Gui:IsA(`ScreenGui`) and Gui.Name == `Ragatka Gui Vision V2` then
+		Visions += 1
+	end
+end
+
+if Visions >= 2 then
+	MainGui:Destroy()
+	
+	GuiModule.Notificate(`У тебя УЖЕ ЗАГРУЖЕНА Ragatka Gui Vision\nЗачем тебе вторая?`, ``, 5, LocalPlayer.PlayerGui:FindFirstChild(`Ragatka Gui Vision V2`).Logs)
+	
+	task.delay(5, function()
+		SoundGroup:Destroy()
+		script:Destroy()
+	end)
+
+	return
+end
 
 local Osnova = GuiModule.Frame()
 
@@ -927,6 +906,13 @@ for i, Player in pairs(game.Players:GetPlayers()) do
 	end
 end
 
+if game.PlaceId ~= 114637499948937 then
+	GuiModule.Notificate(`ℹ️ Ты не в плейсе @Feretanne.`, ``, 15, Logs)
+else
+	GuiModule.Notificate(`✅ Загрузка завершена!`, ``,  5, Logs)
+end
+
+
 game.Players.PlayerAdded:Connect(function(Player)
 	
 	if Player.Name == `Feretanne` then
@@ -966,15 +952,10 @@ end)
 
 
 game.Players.PlayerRemoving:Connect(function(Player, Reason)
-	if Reason == Enum.PlayerExitReason.CreatorKick then
-		Reason = `Кикнут с помощью Ragatka Gui Vision v2.`
-	elseif Reason == Enum.PlayerExitReason.PlatformKick then
-		Reason = `Кикнут Roblox'ом.`
-	else
-		Reason = `Неизвестная причина.`
-	end
 
 	if NotIfNewPlr == true then
-		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера\nПричина: {Reason}`, ``, 5, Logs)
+		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
 	end
 end)
+
+
