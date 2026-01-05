@@ -47,7 +47,6 @@ local SoundsModule = {
 	vaznoe_notif = `rbxassetid://117409737658405`,
 }
 
-
 local SoundGroup = Instance.new(`SoundGroup`)
 SoundGroup.Name = `SFX_{script.Name}`
 SoundGroup.Parent = game:GetService(`SoundService`)
@@ -60,14 +59,47 @@ function SoundsModule.PlaySound(SoundName:string)
 	Debris:AddItem(Sound, Sound.TimeLength + 1)
 end
 
-local GuiModule = {}
+local GuiModule = {
+	Colors = {
+		Black = Color3.fromRGB(0,0,0),
+		White = Color3.fromRGB(255,255,255),
+		Blue = Color3.fromRGB(0, 80, 255),
+		Red = Color3.fromRGB(255, 0, 4),
+	},
+	Icons = {
+		Close = `http://www.roblox.com/asset/?id=6031094678`,
+		Peoples = `http://www.roblox.com/asset/?id=6034287513`,
+		Delete = `http://www.roblox.com/asset/?id=6022668939`,
+		TwoChecked = `http://www.roblox.com/asset/?id=6023426929`,
+		
+		Additional = `http://www.roblox.com/asset/?id=6035047380`,
+		Hammer = `rbxassetid://3429559843`,
+		Kick = `http://www.roblox.com/asset/?id=6031084771`,
+		Unban = `http://www.roblox.com/asset/?id=6034439642`,
+		WhiteList = `http://www.roblox.com/asset/?id=6026568229`,
+		Friends = `rbxasset://textures/ui/Settings/Players/FriendIcon@2x.png`,
+		All = `rbxasset://textures/ui/Settings/LeaveGame/playernumber_strokeStyle@3x.png`,
+		OnePlayer = `rbxasset://textures/ui/PlayerList/NewFollowing@3x.png`,
+	},
+}
 
-
-function GuiModule.Corner(guiObject)
+function GuiModule.Corner(guiObject, Radius:number)
 	local Corner = Instance.new(`UICorner`)
-	Corner.CornerRadius = UDim.new(0,10)
+	Corner.CornerRadius = UDim.new(0, Radius or 10)
+	
 	Corner.Parent = guiObject
 	return Corner
+end
+
+function GuiModule.Gradient(guiObject, Color1:Color3, Color2:Color3)
+	local Gradient = Instance.new(`UIGradient`)
+	Gradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color1),
+		ColorSequenceKeypoint.new(1, Color2)
+	})
+	
+	Gradient.Parent = guiObject
+	return Gradient
 end
 
 function GuiModule.Padding(guiObject)
@@ -142,44 +174,109 @@ function GuiModule.Notificate(Text:string, Sound, Time:number, to)
 
 end
 
-function GuiModule.Button(guiObject)
-	local Button = Instance.new(`TextButton`)
-	GuiModule.Corner(Button)
+function GuiModule.Text(parentTo, IgnoreUIComponents:boolean)
+	local Text = Instance.new(`TextLabel`)
 
+	if not IgnoreUIComponents then
+		local Corner = GuiModule.Corner(Text)
+		local Padding = GuiModule.Padding(Text)
+		local Stroke = GuiModule.Stroke(Text)
+	end
+
+	Text.BackgroundTransparency = 1
+	Text.TextSize = 22
+	Text.Font = Enum.Font.RobotoMono
+	Text.AutomaticSize = `XY`
+	Text.RichText = true
+	Text.Size = UDim2.fromOffset(0,0)
+	Text.TextColor3 = Color3.fromRGB(255,255,255)
+	Text.Parent = parentTo
+	return Text
+end
+
+function GuiModule.Button(guiObject, Icon)
+	local Button = Instance.new(`TextButton`)
+
+	Button.TextTransparency = 1
 	Button.BackgroundColor3 = Color3.fromRGB(255,255,255)
 	Button.TextSize = 22
-	Button.Font = Enum.Font.Nunito
+	Button.Font = Enum.Font.RobotoMono
+	Button.FontFace.Bold = true
 	Button.AutomaticSize = `XY`
-	Button.BorderMode = `Inset`
 	Button.RichText = true
 	Button.Size = UDim2.fromOffset(0,0)
 	Button.AutoButtonColor = false
+	
+	
+	local ButtonIcon
+	if Icon then
+		local List = GuiModule.List(Button)
+			List.FillDirection = Enum.FillDirection.Horizontal
+			List.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			List.VerticalAlignment = Enum.VerticalAlignment.Center
+			
+		ButtonIcon = GuiModule.Icon(Button, Icon)
+	end
 
+	local ButtonText = GuiModule.Text(Button, true)
+	ButtonText.TextColor3 = Color3.fromRGB(0,0,0)
+	
+	Button:GetPropertyChangedSignal(`Text`):Connect(function()
+		
+		ButtonText.Text = Button.Text
+	end)
+	
+	local Gradient = GuiModule.Gradient(Button, Color3.fromRGB(255, 255, 255), Color3.fromRGB(195, 195, 195))
+	
+	local Corner = GuiModule.Corner(Button)
 	local Padding = GuiModule.Padding(Button)
 	local Stroke = GuiModule.Stroke(Button)
-
+	
 	Button.MouseEnter:Connect(function()
+		SoundsModule.PlaySound(SoundsModule.hover)
+
+		if Icon then
+			TweenService:Create(ButtonIcon, Info, {Size = UDim2.fromOffset(27,27)}):Play()
+		end
+		TweenService:Create(Gradient, Info, {Rotation = 30}):Play()
+		TweenService:Create(Corner, Info, {CornerRadius = UDim.new(0,20)}):Play()
 		
 		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(213, 213, 213)}):Play()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
-		TweenService:Create(Button, InfoBack, {BorderSizePixel = 5}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,3)}):Play()
 	end)
 
 	Button.MouseLeave:Connect(function()
-		SoundsModule.PlaySound(SoundsModule.hover)
+		if Icon then
+			TweenService:Create(ButtonIcon, Info, {Size = UDim2.fromOffset(20,20)}):Play()
+		end
+		TweenService:Create(Gradient, Info, {Rotation = 0}):Play()
+		TweenService:Create(Corner, Info, {CornerRadius = UDim.new(0,10)}):Play()
 
 		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
-		TweenService:Create(Button, InfoBack, {BorderSizePixel = 0}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,0)}):Play()
 	end)
 
 	Button.MouseButton1Down:Connect(function()
+		if Icon then
+			TweenService:Create(ButtonIcon, Info, {Size = UDim2.fromOffset(20,20)}):Play()
+		end
+		TweenService:Create(Gradient, Info, {Rotation = 90}):Play()
+		TweenService:Create(Corner, Info, {CornerRadius = UDim.new(0,10)}):Play()
+
 		TweenService:Create(Button, TweenInfo.new(.2), {BackgroundColor3 = Color3.fromRGB(172, 172, 172)}):Play()
 		TweenService:Create(Padding, InfoBoom, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
-		TweenService:Create(Button, InfoBoom, {BorderSizePixel = 0}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,0)}):Play()
 	end)
 
 	Button.MouseButton1Click:Connect(function()
+		if Icon then
+			TweenService:Create(ButtonIcon, Info, {Size = UDim2.fromOffset(20,20)}):Play()
+		end
+		TweenService:Create(Gradient, Info, {Rotation = 0}):Play()
+		TweenService:Create(Corner, Info, {CornerRadius = UDim.new(0,10)}):Play()
+
 		TweenService:Create(Button, TweenInfo.new(.1), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 
 	end)
@@ -192,7 +289,6 @@ end
 function GuiModule.Frame()
 	local Osnova = Instance.new(`Frame`)
 	GuiModule.Corner(Osnova)
-
 	Osnova.BackgroundTransparency = .5
 	Osnova.AnchorPoint = Vector2.new(0.5,0.5)
 	Osnova.Position = UDim2.fromScale(.5,.5)
@@ -203,6 +299,7 @@ function GuiModule.Frame()
 	Osnova.Parent = MainGui
 
 	local Drag = Instance.new(`UIDragDetector`)
+	Drag.ResponseStyle = Enum.UIDragDetectorResponseStyle.Scale
 	Drag.Parent = Osnova
 
 	local Padding = GuiModule.Padding(Osnova)
@@ -223,32 +320,30 @@ function GuiModule.List(guiObject)
 	return List
 end
 
-function GuiModule.Text(parentTo)
-	local Text = GuiModule.Button()
-	Text.Interactable = false
-	Text.BackgroundTransparency = 1
-	Text.TextColor3 = Color3.fromRGB(255,255,255)
-	Text.Parent = parentTo
-	return Text
-end
-
-function GuiModule.Icon(parentTo)
+function GuiModule.Icon(parentTo, Image:string)
 	local Icon = Instance.new(`ImageLabel`)
-	Icon.Size = UDim2.fromOffset(50,50)
-	GuiModule.Corner(Icon)
+	if Image then
+		Icon.Image = Image
+	end
+	Icon.BorderSizePixel = 0
+	Icon.Transparency = 1
+	Icon.ImageColor3 = Color3.fromRGB(0,0,0)
+	Icon.Size = UDim2.fromOffset(20,20)
+	Icon.Parent = parentTo
+	--GuiModule.Corner(Icon)
 
 	return Icon
 end
 
 function GuiModule.Scrolling(parentTo)
 	local Scroll = Instance.new(`ScrollingFrame`)
-	Scroll.Size = UDim2.new(1,0,0,200)
+	Scroll.Size = UDim2.new(1,0,0,70)
 	Scroll.AutomaticCanvasSize = `XY`
 	Scroll.LayoutOrder = 0
 	Scroll.BackgroundTransparency = 1
 	Scroll.CanvasSize = UDim2.new(0,0,0,0)
 	Scroll.Parent = parentTo
-	GuiModule.List(Scroll)
+	GuiModule.List(Scroll).FillDirection = Enum.FillDirection.Horizontal
 
 	return Scroll
 end
@@ -258,7 +353,7 @@ function GuiModule.TextBox(parentTo)
 	local TextBox = Instance.new(`TextBox`)
 	TextBox.TextSize = 22
 	TextBox.BorderMode = `Inset`
-	TextBox.Font = Enum.Font.Nunito
+	TextBox.Font = Enum.Font.RobotoMono
 	TextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
 	TextBox.Size = UDim2.fromOffset(0,0)
 	TextBox.AutomaticSize = `XY`
@@ -267,7 +362,7 @@ function GuiModule.TextBox(parentTo)
 	TextBox.Parent = parentTo
 	GuiModule.Corner(TextBox)
 	local Padding = GuiModule.Padding(TextBox)
-	GuiModule.Stroke(TextBox)
+	local Stroke = GuiModule.Stroke(TextBox)
 
 	TextBox.Focused:Connect(function()
 		TweenService:Create(Padding, InfoV2, { PaddingLeft = UDim.new(0,10), PaddingRight = UDim.new(0,120) }):Play()
@@ -275,16 +370,16 @@ function GuiModule.TextBox(parentTo)
 
 	TextBox.FocusLost:Connect(function()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
-		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,0)}):Play()
 	end)
 
 	TextBox.MouseEnter:Connect(function()
 		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
-		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 5}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,3)}):Play()
 	end)
 
 	TextBox.MouseLeave:Connect(function()
-		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+		TweenService:Create(Stroke, InfoBack, {BorderOffset = UDim.new(0,0)}):Play()
 	end)
 
 	return TextBox
@@ -333,8 +428,8 @@ end
 local Osnova = GuiModule.Frame()
 
 
-local KillPlayers = GuiModule.Button(Osnova)
-KillPlayers.Text = `🎬 Убить игроков`
+local KillPlayers = GuiModule.Button(Osnova, GuiModule.Icons.Peoples)
+KillPlayers.Text = `Килл Игроков`
 
 local KillPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
 KillPlayersFrame.Visible = false
@@ -345,7 +440,7 @@ KillPlayers.MouseButton1Click:Connect(function()
 	KillPlayersFrame.Visible = not KillPlayersFrame.Visible
 end)
 
-local Button_KillServer = GuiModule.Button(KillPlayersFrame)
+local Button_KillServer = GuiModule.Button(KillPlayersFrame, GuiModule.Icons.All)
 Button_KillServer.Text = `Всех игроков`
 Button_KillServer.MouseButton1Click:Connect(function()
 	GuiModule.Notificate(`✅ Успешно убил весь сервер.`, ``, 5, Logs)
@@ -360,8 +455,8 @@ Button_KillServer.MouseButton1Click:Connect(function()
 end)
 
 
-local Button_KillNonFriends = GuiModule.Button(KillPlayersFrame)
-Button_KillNonFriends.Text = `Всех НЕ друзей`
+local Button_KillNonFriends = GuiModule.Button(KillPlayersFrame, GuiModule.Icons.Friends)
+Button_KillNonFriends.Text = `Всех <b>кроме</b> друзей`
 
 Button_KillNonFriends.MouseButton1Click:Connect(function()
 	local NonCoolDudes = {}
@@ -386,8 +481,8 @@ Button_KillNonFriends.MouseButton1Click:Connect(function()
 	end
 end)
 
-local Button_KillPlayer = GuiModule.Button(KillPlayersFrame)
-Button_KillPlayer.Text = `Определенного игрока`
+local Button_KillPlayer = GuiModule.Button(KillPlayersFrame, GuiModule.Icons.OnePlayer)
+Button_KillPlayer.Text = `<b>Одного</b> игрока`
 
 Button_KillPlayer.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
@@ -455,8 +550,8 @@ end)
 
 
 --- КИККК
-local KickPlayers = GuiModule.Button(Osnova)
-KickPlayers.Text = `🤡 Кикать игроков`
+local KickPlayers = GuiModule.Button(Osnova, GuiModule.Icons.Kick)
+KickPlayers.Text = `Кик игроков`
 
 local KickPlayersFrame = GuiModule.AutoSizeFrame(Osnova)
 KickPlayersFrame.Visible = false
@@ -467,7 +562,7 @@ KickPlayers.MouseButton1Click:Connect(function()
 	KickPlayersFrame.Visible = not KickPlayersFrame.Visible
 end)
 
-local Button_KickServer = GuiModule.Button(KickPlayersFrame)
+local Button_KickServer = GuiModule.Button(KickPlayersFrame, GuiModule.Icons.All)
 Button_KickServer.Text = `Всех игроков`
 Button_KickServer.MouseButton1Click:Connect(function()
 	GuiModule.Notificate(`✅ Успешно кикнул весь сервер.`, ``, 5, Logs)
@@ -482,8 +577,8 @@ Button_KickServer.MouseButton1Click:Connect(function()
 end)
 
 
-local Button_KickNonFriends = GuiModule.Button(KickPlayersFrame)
-Button_KickNonFriends.Text = `Всех НЕ друзей`
+local Button_KickNonFriends = GuiModule.Button(KickPlayersFrame, GuiModule.Icons.Friends)
+Button_KickNonFriends.Text = `Всех <b>кроме</b> друзей`
 
 Button_KickNonFriends.MouseButton1Click:Connect(function()
 	local NonCoolDudes = {}
@@ -509,8 +604,8 @@ Button_KickNonFriends.MouseButton1Click:Connect(function()
 end)
 
 
-local Button_KickPlayer = GuiModule.Button(KickPlayersFrame)
-Button_KickPlayer.Text = `Определенного игрока`
+local Button_KickPlayer = GuiModule.Button(KickPlayersFrame, GuiModule.Icons.OnePlayer)
+Button_KickPlayer.Text = `<b>Одного</b> игрока`
 
 Button_KickPlayer.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
@@ -578,8 +673,8 @@ end)
 
 -- СЕРВЕР БАНЫ
 
-local ServerBan = GuiModule.Button(Osnova)
-ServerBan.Text = `💘 Сервер Бан`
+local ServerBan = GuiModule.Button(Osnova, GuiModule.Icons.Hammer)
+ServerBan.Text = `Сервер-Бан`
 
 local ServerBanFrame = GuiModule.AutoSizeFrame(Osnova)
 ServerBanFrame.Visible = false
@@ -590,7 +685,7 @@ ServerBan.MouseButton1Click:Connect(function()
 	ServerBanFrame.Visible = not ServerBanFrame.Visible
 end)
 
-local Button_KickServer = GuiModule.Button(ServerBanFrame)
+local Button_KickServer = GuiModule.Button(ServerBanFrame, GuiModule.Icons.All)
 Button_KickServer.Text = `Всех игроков`
 Button_KickServer.MouseButton1Click:Connect(function()
 	GuiModule.Notificate(`✅ Успешно сервер-забанил весь сервер.`, ``, 5, Logs)
@@ -606,8 +701,8 @@ Button_KickServer.MouseButton1Click:Connect(function()
 end)
 
 
-local Button_ServerBanNonFriends = GuiModule.Button(ServerBanFrame)
-Button_ServerBanNonFriends.Text = `Всех НЕ друзей`
+local Button_ServerBanNonFriends = GuiModule.Button(ServerBanFrame, GuiModule.Icons.Friends)
+Button_ServerBanNonFriends.Text = `Всех <b>кроме</b> друзей`
 
 Button_ServerBanNonFriends.MouseButton1Click:Connect(function()
 	local NonCoolDudes = {}
@@ -636,8 +731,8 @@ Button_ServerBanNonFriends.MouseButton1Click:Connect(function()
 end)
 
 
-local Button_ServerBanPlayer = GuiModule.Button(ServerBanFrame)
-Button_ServerBanPlayer.Text = `Определенного игрока`
+local Button_ServerBanPlayer = GuiModule.Button(ServerBanFrame, GuiModule.Icons.OnePlayer)
+Button_ServerBanPlayer.Text = `<b>Одного</b> игрока`
 
 Button_ServerBanPlayer.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
@@ -706,8 +801,8 @@ end)
 
 -- СЕРВЕР-РАЗБАН
 
-local Button_ServerUnBan = GuiModule.Button(Osnova)
-Button_ServerUnBan.Text = `ℹ️ Разбан`
+local Button_ServerUnBan = GuiModule.Button(Osnova, GuiModule.Icons.Unban)
+Button_ServerUnBan.Text = `Сервер-Разбан`
 
 local ServerUnBan = GuiModule.AutoSizeFrame(Osnova)
 ServerUnBan.Visible = false
@@ -761,8 +856,8 @@ end)
 
 
 -- ДОПОЛНИТЕЛЬНОО
-local Button_Additional = GuiModule.Button(Osnova)
-Button_Additional.Text = `ℹ️ Дополнительно`
+local Button_Additional = GuiModule.Button(Osnova, GuiModule.Icons.Additional)
+Button_Additional.Text = `Дополнительно`
 
 local Additional = GuiModule.AutoSizeFrame(Osnova)
 Additional.Visible = false
@@ -774,12 +869,12 @@ Button_Additional.MouseButton1Click:Connect(function()
 end)
 
 local AutoStopOfFreJoinsBtn = GuiModule.Button(Additional)
-AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
+AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: <b>{BlacklistActive}</b>`
 AutoStopOfFreJoinsBtn.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
 
 	BlacklistActive = not BlacklistActive
-	AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: {BlacklistActive}`
+	AutoStopOfFreJoinsBtn.Text = `Автостоп при заходе Feretanne: <b>{BlacklistActive}</b>`
 end)
 
 local TellTheTruth = GuiModule.Button(Additional)
@@ -810,21 +905,21 @@ TellTheTruth.MouseButton1Click:Connect(function()
 end)
 
 local AutoKickIfFerJoinsBtn = GuiModule.Button(Additional)
-AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
+AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: <b>{AutoKickIfFeretanJoins}</b>`
 AutoKickIfFerJoinsBtn.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
 
 	AutoKickIfFeretanJoins = not AutoKickIfFeretanJoins
-	AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: {AutoKickIfFeretanJoins}`
+	AutoKickIfFerJoinsBtn.Text = `Автокик при заходе Feretanne: <b>{AutoKickIfFeretanJoins}</b>`
 end)
 
 local NotifIfNewPlrBtn = GuiModule.Button(Additional)
-NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
+NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: <b>{NotIfNewPlr}</b>`
 NotifIfNewPlrBtn.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
 
 	NotIfNewPlr = not NotIfNewPlr
-	NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: {NotIfNewPlr}`
+	NotifIfNewPlrBtn.Text = `Уведомлять если зашел/вышел игрок: <b>{NotIfNewPlr}</b>`
 end)
 
 local Kick = GuiModule.Button(Additional)
@@ -840,8 +935,8 @@ DeleteGui.MouseButton1Click:Connect(function()
 end)
 
 -- ДОПОЛНИТЕЛЬНОО
-local Button_WhiteList = GuiModule.Button(Osnova)
-Button_WhiteList.Text = `🤍 Вайтлист: {WhiteListMode}`
+local Button_WhiteList = GuiModule.Button(Osnova, GuiModule.Icons.WhiteList)
+Button_WhiteList.Text = `Вайтлист: <b>{WhiteListMode}</b>.`
 
 Button_WhiteList.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.categoryClick)
@@ -869,7 +964,7 @@ Button_WhiteList.MouseButton1Click:Connect(function()
 	elseif WhiteListMode == `только вы` then
 		WhiteListMode = `отключён`
 	end
-	Button_WhiteList.Text = `🤍 Вайтлист: {WhiteListMode}.`
+	Button_WhiteList.Text = `Вайтлист: <b>{WhiteListMode}</b>.`
 
 end)
 
