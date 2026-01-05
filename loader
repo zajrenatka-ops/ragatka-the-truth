@@ -856,6 +856,7 @@ end)
 
 -- ГЛОБАЛ СООБЩЕНИЯ
 local Button_GlobalMessages = GuiModule.Button(Osnova, GuiModule.Icons.GlobalMessage)
+Button_GlobalMessages.Text = `Глобальные сообщения`
 
 local GlobalMessages = GuiModule.AutoSizeFrame(Osnova)
 GlobalMessages.Visible = false
@@ -870,6 +871,7 @@ local GlobalMessageTextBox = GuiModule.TextBox(GlobalMessages)
 GlobalMessageTextBox.PlaceholderText = `💬 Текст сообщения`
 
 local GlobalMessageSend = GuiModule.Button(GlobalMessages, GuiModule.Icons.Send)
+GlobalMessageSend.Text = `Отправить`
 GlobalMessageSend.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
 	
@@ -1073,5 +1075,4 @@ game.Players.PlayerRemoving:Connect(function(Player, Reason)
 		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
 	end
 end)
-
 
