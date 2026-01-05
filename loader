@@ -893,7 +893,6 @@ GlobalMessageAutoSpam.MouseButton1Click:Connect(function()
 	if AutoSpam == true then
 		task.defer(function()
 			while AutoSpam do
-				print(`my movie`)
 				
 				WorkspaceRemotes.MessageEvent:FireServer(GlobalMessageTextBox.Text)
 
@@ -1126,9 +1125,10 @@ if game:GetService(`RunService`):IsStudio() == false then
 		local VisionVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
 
 		while true do
-			
 			local NewVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
 			
+			print(`Текущая версия: {VisionVersion}; Новая версия: {NewVersion}`)
+
 			
 			if VisionVersion ~= NewVersion then
 				GuiModule.Notificate(`Доступна новая версия Ragatka Gui Vision: <b>{NewVersion}</b>\nОбновиться можно в главном меню`, ``, 120, Logs)
@@ -1155,4 +1155,5 @@ if game:GetService(`RunService`):IsStudio() == false then
 		
 	end)
 end
+
 
