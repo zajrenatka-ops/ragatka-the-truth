@@ -1,13 +1,10 @@
---loader.lua
-
 script.Name = `FERRERTANGUI`
 print(`[{script.Name}]: 🤓 Начинаю грязные дела~`)
 
 local dirty_table = {"Ez", "game hacked by ur mom🤣🤣🤣", "cry kid", "cry of fear", "сру в кефир", "slenders #1", "bacon = noob", "cry about it", "u suck", "you dont deserve to live", "wsp bbg😍"}
 
 local BlackListed = {}
-local LeaveText = `LEAVE THIS FUCKING GAME`
-
+local LeaveText = `LEAVE THIS GAME`
 
 local TweenService = game:GetService(`TweenService`)
 local Debris = game:GetService(`Debris`)
@@ -80,6 +77,9 @@ local GuiModule = {
 		Friends = `rbxasset://textures/ui/Settings/Players/FriendIcon@2x.png`,
 		All = `rbxasset://textures/ui/Settings/LeaveGame/playernumber_strokeStyle@3x.png`,
 		OnePlayer = `rbxasset://textures/ui/PlayerList/NewFollowing@3x.png`,
+		GlobalMessage = `http://www.roblox.com/asset/?id=6022668946`,
+		Send = `http://www.roblox.com/asset/?id=6035067832`,
+		
 	},
 }
 
@@ -854,6 +854,27 @@ UnServerBanEveryone.MouseButton1Click:Connect(function()
 	BlackListed = {}
 end)
 
+-- ГЛОБАЛ СООБЩЕНИЯ
+local Button_GlobalMessages = GuiModule.Button(Osnova, GuiModule.Icons.GlobalMessage)
+
+local GlobalMessages = GuiModule.AutoSizeFrame(Osnova)
+GlobalMessages.Visible = false
+
+Button_GlobalMessages.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.categoryClick)
+	
+	GlobalMessages.Visible = not GlobalMessages.Visible
+end)
+
+local GlobalMessageTextBox = GuiModule.TextBox(GlobalMessages)
+GlobalMessageTextBox.PlaceholderText = `💬 Текст сообщения`
+
+local GlobalMessageSend = GuiModule.Button(GlobalMessages, GuiModule.Icons.Send)
+GlobalMessageSend.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+	
+	WorkspaceRemotes.MessageEvent:FireServer(GlobalMessageTextBox.Text)
+end)
 
 -- ДОПОЛНИТЕЛЬНОО
 local Button_Additional = GuiModule.Button(Osnova, GuiModule.Icons.Additional)
