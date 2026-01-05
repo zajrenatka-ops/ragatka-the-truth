@@ -84,7 +84,7 @@ local GuiModule = {
 		Send = `http://www.roblox.com/asset/?id=6035067832`,
 		Spam = `http://www.roblox.com/asset/?id=6035067826`,
 		Time = `http://www.roblox.com/asset/?id=6031754541`,
-		
+		Update = `http://www.roblox.com/asset/?id=6031225810`,
 	},
 }
 
@@ -131,17 +131,15 @@ end
 
 function GuiModule.Notificate(Text:string, Sound, Time:number, to)
 	
-	if Sound == `` or Sound == nil then
-		SoundsModule.PlaySound(SoundsModule.notification)
-	else
-		SoundsModule.PlaySound(Sound)
-	end
+	SoundsModule.PlaySound(SoundsModule.vaznoe_notif)
+
 	
 	local Notif = Instance.new(`TextButton`)
 	Notif.Size = UDim2.fromScale(0,0)
 	Notif.TextSize = 20
 	Notif.Font = Enum.Font.Nunito
 	Notif.AutomaticSize = `XY`
+	Notif.RichText = true
 	Notif.Parent = to
 	Notif.TextColor3 = Color3.fromRGB(255,255,255)
 	Notif.BackgroundTransparency = 1
@@ -409,6 +407,7 @@ Logs.Position = UDim2.new(0.5,0,0,15)
 local List = Logs:FindFirstChild(`UIListLayout`)
 List.HorizontalAlignment = `Center`
 
+--[[
 local Visions = 0
 
 for i, Gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
@@ -429,6 +428,7 @@ if Visions >= 2 then
 
 	return
 end
+]]
 
 local Osnova = GuiModule.Frame()
 
@@ -1039,7 +1039,11 @@ RagatkaGuiVision.Parent = MainGui
 
 RagatkaGuiVision.MouseButton1Click:Connect(function()
 	Osnova.Visible = not Osnova.Visible
-	RagatkaGuiVision.Text = `Рагатка Гуи Вижн v2: <b>{Osnova.Visible}</b>`
+	if game:GetService(`RunService`):IsStudio() then
+		RagatkaGuiVision.Text = `Studio Test: <b>{Osnova.Visible}</b>`
+	else
+		RagatkaGuiVision.Text = `Ragatka Gui Vision v{loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()} <b>{Osnova.Visible}</b>`
+	end
 
 	if Osnova.Visible == true then
 		TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
@@ -1053,7 +1057,6 @@ game.ContentProvider:PreloadAsync({
 	`rbxassetid://10066914500`,
 })
 
-GuiModule.Notificate(`Загрузил все звуки для Ui!`, SoundsModule.vaznoe_notif, 5, Logs)
 
 for i, Player in pairs(game.Players:GetPlayers()) do
 	if Player.Name == `Feretanne` then
@@ -1064,7 +1067,7 @@ end
 if game.PlaceId ~= 114637499948937 then
 	GuiModule.Notificate(`ℹ️ Ты не в плейсе @Feretanne.`, ``, 15, Logs)
 else
-	GuiModule.Notificate(`✅ Загрузка завершена!`, ``,  5, Logs)
+	GuiModule.Notificate(`✅ Загрузка завершена! Автообновление включено. <b><i>BETA</i></b>`, ``,  5, Logs)
 end
 
 
@@ -1109,7 +1112,47 @@ end)
 game.Players.PlayerRemoving:Connect(function(Player, Reason)
 
 	if NotIfNewPlr == true then
-		GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
+		if table.find(BlackListed, Player.Name) then
+			GuiModule.Notificate(`Игрок <b>{Player.Name}</b> кикнут с сервера\nтак как он сервер-забанен.`, ``, 5, Logs)
+		else
+			GuiModule.Notificate(`Игрок <b>{Player.Name}</b> вышел с сервера.`, ``, 5, Logs)
+		end
 	end
 end)
+
+
+if game:GetService(`RunService`):IsStudio() == false then
+	task.defer(function()
+		local VisionVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
+
+		while true do
+			
+			local NewVersion = loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/versionnumber"))()
+			
+			
+			if VisionVersion ~= NewVersion then
+				GuiModule.Notificate(`Доступна новая версия Ragatka Gui Vision: <b>{NewVersion}</b>\nОбновиться можно в главном меню`, ``, 120, Logs)
+				local UpdateButton = GuiModule.Button(Osnova, GuiModule.Icons.Update)
+				UpdateButton.Text = `<b>Обновление до версии <i>{NewVersion}</i></b>.`
+				UpdateButton:FindFirstChildOfClass(`UIGradient`).Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 230)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 136))
+				})
+				
+				UpdateButton.MouseButton1Click:Connect(function()
+					
+					MainGui:Destroy()
+					SoundGroup:Destroy()
+					
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/zajrenatka-ops/ragatka-the-truth/main/loader"))()
+				end)
+				
+				break
+			end
+			
+			task.wait(5)
+		end
+		
+	end)
+end
 
