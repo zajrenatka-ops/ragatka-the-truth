@@ -23,6 +23,9 @@ local BlacklistActive = true
 local AutoStopIfFeretanJoins = true
 local NotIfNewPlr = true
 
+local AutoSpam = false
+local SpamDelay = .5
+
 local WhiteListMode = `отключён`
 
 local MainGui = Instance.new(`ScreenGui`)
@@ -79,6 +82,8 @@ local GuiModule = {
 		OnePlayer = `rbxasset://textures/ui/PlayerList/NewFollowing@3x.png`,
 		GlobalMessage = `http://www.roblox.com/asset/?id=6022668946`,
 		Send = `http://www.roblox.com/asset/?id=6035067832`,
+		Spam = `http://www.roblox.com/asset/?id=6035067826`,
+		Time = `http://www.roblox.com/asset/?id=6031754541`,
 		
 	},
 }
@@ -876,6 +881,38 @@ GlobalMessageSend.MouseButton1Click:Connect(function()
 	SoundsModule.PlaySound(SoundsModule.click)
 	
 	WorkspaceRemotes.MessageEvent:FireServer(GlobalMessageTextBox.Text)
+end)
+
+local GlobalMessageAutoSpam = GuiModule.Button(GlobalMessages, GuiModule.Icons.Spam)
+GlobalMessageAutoSpam.Text = `Автоспам: <b>{AutoSpam}</b>`
+GlobalMessageAutoSpam.MouseButton1Click:Connect(function()
+	SoundsModule.PlaySound(SoundsModule.click)
+
+	AutoSpam = not AutoSpam
+	
+	if AutoSpam == true then
+		task.defer(function()
+			while AutoSpam do
+				print(`my movie`)
+				
+				WorkspaceRemotes.MessageEvent:FireServer(GlobalMessageTextBox.Text)
+
+				if tonumber(SpamDelay) ~= nil then
+					task.wait(SpamDelay)
+				else
+					task.wait(.5)
+				end
+			end
+		end)
+	end
+	
+	GlobalMessageAutoSpam.Text = `Автоспам: <b>{AutoSpam}</b>`
+end)
+
+local Pereodichnost = GuiModule.TextBox(GlobalMessages)
+Pereodichnost.PlaceholderText = `Задержка`
+Pereodichnost:GetPropertyChangedSignal(`Text`):Connect(function()
+	SpamDelay = tonumber(Pereodichnost.Text)
 end)
 
 -- ДОПОЛНИТЕЛЬНОО
