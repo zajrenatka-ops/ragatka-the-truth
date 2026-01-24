@@ -1,5 +1,5 @@
 local TweenService = game:GetService(`TweenService`)
-
+local Debris = game:GetService(`Debris`)
 
 local Info = TweenInfo.new(.15)
 local InfoV2 = TweenInfo.new(.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
@@ -344,6 +344,15 @@ function GuiModule.AutoSizeFrame(parentTo)
 	Frame.Parent = parentTo
 
 	return Frame
+end
+
+function GuiModule.ScreenGui(parentTo)
+	local Gui = Instance.new(`ScreenGui`)
+	Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	Gui.IgnoreGuiInset = false
+	Gui.ResetOnSpawn = false
+	Gui.Parent = parentTo or script
+	return GuiModule
 end
 
 return GuiModule
