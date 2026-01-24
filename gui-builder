@@ -352,7 +352,7 @@ function GuiModule.ScreenGui(parentTo)
 	Gui.IgnoreGuiInset = false
 	Gui.ResetOnSpawn = false
 	Gui.Parent = parentTo or script
-	return GuiModule
+	return Gui
 end
 
 return GuiModule
