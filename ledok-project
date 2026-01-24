@@ -1,0 +1,645 @@
+script.Name = `LedokGui`
+print(`[{script.Name}]: 🤓 Начинаю грязные дела~`)
+
+local dirty_table = {`niggers`, `jew`, `faggot`, `nazi`, `hitler`, `i rape children`, `bitch ass nigga` }
+--local dirty_table = {`ВСЕ ЧИТЕРЫ В СБОРЁ, МОНСТРЫ REMOTE SPY,\nПЕРЕХВАТЫВАЕМ ХУКИ, СПАМИМ СООБЩЕНМЯМИ !!!\npornhub.org, mymovie.com, hitler.com, niggers.org`}
+local TweenService = game:GetService(`TweenService`)
+local Debris = game:GetService(`Debris`)
+local RunService = game:GetService(`RunService`)
+local Replicated = game:GetService(`ReplicatedStorage`)
+
+local Info = TweenInfo.new(.15)
+local InfoV2 = TweenInfo.new(.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+local InfoBoom = TweenInfo.new(.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
+local InfoBack = TweenInfo.new(.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
+
+local DoSpam = false
+local DoSpamRemoteEvents = false
+
+local AutoKickIfLedokJoins = false
+local AutoStopIfLedokJoins = true
+local AfkMode = false
+
+local MainGui = Instance.new(`ScreenGui`)
+MainGui.Name = `Ragatka Gui Vision`
+MainGui.DisplayOrder = 100000
+MainGui.IgnoreGuiInset = true
+MainGui.ResetOnSpawn = false
+MainGui.ZIndexBehavior = `Sibling`
+MainGui.Parent = PlayerGui
+
+local GuiModule = {}
+
+function GuiModule.Notificate(Text, icon, Time, to)
+	local Notification = Instance.new(`ImageButton`)
+	Notification.AnchorPoint = Vector2.new(.5,.5)
+
+	Notification.BackgroundTransparency = 1
+	Notification.Size = UDim2.fromOffset(500,40)
+
+	local Container = Instance.new(`Frame`)
+	Container.BackgroundTransparency = 1
+	Container.AnchorPoint = Vector2.new(0,0.5)
+	Container.Size = UDim2.fromScale(1,1)
+	Container.Parent = Notification
+
+	local Label = Instance.new(`TextLabel`)
+	Label.BackgroundTransparency = .4
+	Label.BackgroundTransparency = 1
+	Label.TextTransparency = 1
+	Label.Text = Text
+	Label.Size = UDim2.fromScale(1,1)
+	Label.RichText = true
+	Label.TextSize = 25
+	--Label.AutomaticSize = `XY`
+	Label.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	Label.Font = Enum.Font.Nunito
+	Label.TextColor3 = Color3.fromRGB(255,255,255)
+	Label.Parent = Container
+
+	GuiModule.Padding(Label)
+	local Corner = GuiModule.Corner(Label)
+	Corner.CornerRadius = UDim.new(1,0)
+
+	local CountdownContainer = Instance.new(`CanvasGroup`)
+	CountdownContainer.Size = UDim2.fromScale(1,1)
+	CountdownContainer.ZIndex = 2
+	CountdownContainer.BackgroundTransparency = 1
+	CountdownContainer.Parent = Container
+	GuiModule.List(CountdownContainer)
+
+	local Corner = GuiModule.Corner(CountdownContainer)
+	Corner.CornerRadius = UDim.new(1,0)
+
+	local Gradient = Instance.new(`UIGradient`)
+	Gradient.Color = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255)) }
+	Gradient.Transparency = NumberSequence.new{ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }
+	Gradient.Rotation = 90
+	Gradient.Parent = CountdownContainer
+	local Icon = GuiModule.Icon(CountdownContainer)
+
+	if icon then
+		Icon.Image = icon
+		Icon.Parent = CountdownContainer
+	end
+
+	local Countdown = Instance.new(`Frame`)
+	Countdown.BackgroundTransparency = .7
+	Countdown.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	Countdown.Size = UDim2.fromScale(1,1)
+	Countdown.Parent = CountdownContainer
+
+	Notification.Parent = to
+
+	local function Close()
+		TweenService:Create(Countdown, Info, {Size = UDim2.fromScale(0,1)}):Play()
+		TweenService:Create(Notification, Info, {Size = UDim2.fromOffset(40,40)}):Play()
+		TweenService:Create(Label, Info, {TextTransparency = 1}):Play()
+		TweenService:Create(Label, Info, {BackgroundTransparency = 1}):Play()
+
+		if icon then
+			TweenService:Create(Icon, Info, {ImageTransparency = 1}):Play()
+		end
+
+		Debris:addItem(Notification, .6)
+	end
+
+	TweenService:Create(Container, InfoV2, {Position = UDim2.fromScale(0,.5)}):Play()
+	TweenService:Create(Label, InfoV2, {TextTransparency = 0}):Play()
+	TweenService:Create(Label, InfoV2, {BackgroundTransparency = .4}):Play()
+
+	local Carantine = coroutine.create(function()
+		TweenService:Create(Countdown, TweenInfo.new(Time), {Size = UDim2.fromScale(0,1)}):Play()
+
+		task.wait(Time - .5)
+		Close()
+	end)
+
+	coroutine.resume(Carantine)
+
+	Notification.MouseButton1Click:Connect(function()
+		coroutine.close(Carantine)
+		Close()
+	end)
+
+end
+
+function GuiModule.Corner(guiObject)
+	local Corner = Instance.new(`UICorner`)
+	Corner.CornerRadius = UDim.new(0,10)
+	Corner.Parent = guiObject
+	return Corner
+end
+
+function GuiModule.Padding(guiObject)
+	local Padding = Instance.new(`UIPadding`)
+	Padding.PaddingBottom = UDim.new(0,5)
+	Padding.PaddingLeft = UDim.new(0,15)
+	Padding.PaddingRight = UDim.new(0,15)
+	Padding.PaddingTop = UDim.new(0,5)
+
+	Padding.Parent = guiObject
+	return Padding
+end
+
+function GuiModule.Stroke(guiObject)
+	local Stroke = Instance.new(`UIStroke`)
+	Stroke.Thickness = 1
+	Stroke.Color = Color3.fromRGB(255,255,255)
+	Stroke.Transparency = .5
+	Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	Stroke.Parent = guiObject
+
+	return Stroke
+end
+
+function GuiModule.Button(guiObject)
+	local Button = Instance.new(`TextButton`)
+	GuiModule.Corner(Button)
+
+	Button.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Button.TextSize = 22
+	Button.Font = Enum.Font.Nunito
+	Button.AutomaticSize = `XY`
+	Button.BorderMode = `Inset`
+	Button.RichText = true
+	Button.Size = UDim2.fromOffset(0,0)
+	Button.AutoButtonColor = false
+
+	local Padding = GuiModule.Padding(Button)
+	local Stroke = GuiModule.Stroke(Button)
+
+	Button.MouseEnter:Connect(function()
+		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(213, 213, 213)}):Play()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
+		TweenService:Create(Button, InfoBack, {BorderSizePixel = 5}):Play()
+	end)
+
+	Button.MouseLeave:Connect(function()
+		TweenService:Create(Button, Info, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(Button, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	Button.MouseButton1Down:Connect(function()
+		TweenService:Create(Button, TweenInfo.new(.2), {BackgroundColor3 = Color3.fromRGB(172, 172, 172)}):Play()
+		TweenService:Create(Padding, InfoBoom, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(Button, InfoBoom, {BorderSizePixel = 0}):Play()
+	end)
+
+	Button.MouseButton1Click:Connect(function()
+		TweenService:Create(Button, TweenInfo.new(.1), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+
+	end)
+
+	Button.Parent = guiObject
+
+	return Button
+end
+
+function GuiModule.Frame()
+	local Osnova = Instance.new(`Frame`)
+	GuiModule.Corner(Osnova)
+
+	Osnova.BackgroundTransparency = .5
+	Osnova.AnchorPoint = Vector2.new(0.5,0.5)
+	Osnova.Position = UDim2.fromScale(.5,.5)
+	Osnova.AutomaticSize = `XY`
+	Osnova.Size = UDim2.fromOffset(0,0)
+	Osnova.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Osnova.BorderSizePixel = 0
+	Osnova.Parent = MainGui
+
+	local Drag = Instance.new(`UIDragDetector`)
+	Drag.Parent = Osnova
+
+	local Padding = GuiModule.Padding(Osnova)
+	Padding.PaddingTop = UDim.new(0,15)
+	Padding.PaddingBottom = UDim.new(0,15)
+
+	local List = GuiModule.List(Osnova)
+
+	return Osnova
+end
+
+function GuiModule.List(guiObject)
+	local List = Instance.new(`UIListLayout`)
+	List.SortOrder = `LayoutOrder`
+	List.HorizontalAlignment = `Left`
+	List.Padding = UDim.new(0,5)
+	List.Parent = guiObject
+	return List
+end
+
+function GuiModule.Text(parentTo)
+	local Text = GuiModule.Button()
+	Text.Interactable = false
+	Text.BackgroundTransparency = 1
+	Text.TextColor3 = Color3.fromRGB(255,255,255)
+	Text.Parent = parentTo
+	return Text
+end
+
+function GuiModule.Icon(parentTo)
+	local Icon = Instance.new(`ImageLabel`)
+	Icon.Size = UDim2.fromOffset(50,50)
+	GuiModule.Corner(Icon)
+
+	return Icon
+end
+
+function GuiModule.Scrolling(parentTo)
+	local Scroll = Instance.new(`ScrollingFrame`)
+	Scroll.Size = UDim2.new(1,0,0,150)
+	Scroll.AutomaticCanvasSize = `XY`
+	Scroll.LayoutOrder = 0
+	Scroll.BackgroundTransparency = 1
+	Scroll.CanvasSize = UDim2.new(0,0,0,0)
+	Scroll.Parent = parentTo
+	GuiModule.List(Scroll)
+
+	return Scroll
+end
+
+function GuiModule.TextBox(parentTo)
+
+	local TextBox = Instance.new(`TextBox`)
+	TextBox.TextSize = 22
+	TextBox.BorderMode = `Inset`
+	TextBox.Font = Enum.Font.Nunito
+	TextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	TextBox.Size = UDim2.fromOffset(0,0)
+	TextBox.AutomaticSize = `XY`
+	TextBox.ClearTextOnFocus = false
+	TextBox.Text = ``
+	TextBox.Parent = parentTo
+	GuiModule.Corner(TextBox)
+	local Padding = GuiModule.Padding(TextBox)
+	GuiModule.Stroke(TextBox)
+
+	TextBox.Focused:Connect(function()
+		TweenService:Create(Padding, InfoV2, { PaddingLeft = UDim.new(0,10), PaddingRight = UDim.new(0,120) }):Play()
+	end)
+
+	TextBox.FocusLost:Connect(function()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,15), PaddingRight = UDim.new(0,15) }):Play()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	TextBox.MouseEnter:Connect(function()
+		TweenService:Create(Padding, Info, { PaddingLeft = UDim.new(0,20), PaddingRight = UDim.new(0,20) }):Play()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 5}):Play()
+	end)
+
+	TextBox.MouseLeave:Connect(function()
+		TweenService:Create(TextBox, InfoBack, {BorderSizePixel = 0}):Play()
+	end)
+
+	return TextBox
+end
+
+function GuiModule.AutoSizeFrame(parentTo)
+	local Frame = GuiModule.Frame()
+	Frame:FindFirstChild(`UIDragDetector`):Destroy()
+	Frame.AutomaticSize = `XY`
+	Frame.BackgroundTransparency = 1
+	Frame.Size = UDim2.fromOffset(0,0)
+	Frame.Parent = parentTo
+
+	return Frame
+end
+
+local Logs = GuiModule.AutoSizeFrame(MainGui)
+Logs.AnchorPoint = Vector2.new(0.5,0)
+Logs.Position = UDim2.new(0.5,0,0,15)
+
+local List = Logs:FindFirstChild(`UIListLayout`)
+List.HorizontalAlignment = `Center`
+
+local Osnova = GuiModule.Frame()
+
+
+local Button_GlobalMessages = GuiModule.Button(Osnova)
+Button_GlobalMessages.Text = `ℹ️ Глобальные Сообщения`
+
+local GlobalMessages = GuiModule.AutoSizeFrame(Osnova)
+GlobalMessages.Visible = false
+
+Button_GlobalMessages.MouseButton1Click:Connect(function()
+	GlobalMessages.Visible = not GlobalMessages.Visible
+end)
+
+local TextBox = GuiModule.TextBox(GlobalMessages)
+TextBox.PlaceholderText = `Текст тута.`
+
+local SendMessage = GuiModule.Button(GlobalMessages)
+SendMessage.Text = `Написать сообщение`
+SendMessage.MouseButton1Click:Connect(function()
+	game.ReplicatedStorage.SendAnnouncement:FireServer(TextBox.Text)
+end)
+
+
+local StartSpam = GuiModule.Button(GlobalMessages)
+StartSpam.Text = `Начать спам`
+StartSpam.MouseButton1Click:Connect(function()
+	DoSpam = not DoSpam
+	GuiModule.Notificate(`❗ DoSpam теперь на <b>{DoSpam}</b>, AutoStopIfLedokJoins: <b>{AutoStopIfLedokJoins}</b>`, nil, 15, Logs)
+	if DoSpam == true then
+		StartSpam.Text = `Остановить спам`
+	else
+		StartSpam.Text = `Начать спам`
+	end
+end)
+
+
+
+local Button_Values = GuiModule.Button(Osnova)
+Button_Values.Text = `ℹ️ Валюшки`
+
+local Values = GuiModule.AutoSizeFrame(Osnova)
+Values.Visible = false
+
+Button_Values.MouseButton1Click:Connect(function()
+	Values.Visible = not Values.Visible
+end)
+
+
+local AutoKick = GuiModule.Button(Values)
+AutoKick.Text = `Авто кик при\nзаходе ледка: <b>{AutoKickIfLedokJoins}</b>`
+
+AutoKick.MouseButton1Click:Connect(function()
+	AutoKickIfLedokJoins = not AutoKickIfLedokJoins
+	AutoKick.Text = `Авто кик при\nзаходе ледка: <b>{AutoKickIfLedokJoins}</b>`
+end)
+
+local AutoSpam = GuiModule.Button(Values)
+AutoSpam.Text = `Авто стоп спама при\nзаходе ледка: <b>{AutoStopIfLedokJoins}</b>`
+AutoSpam.MouseButton1Click:Connect(function()
+	AutoStopIfLedokJoins = not AutoStopIfLedokJoins
+	AutoSpam.Text = `Авто стоп спама при\nзаходе ледка: <b>{AutoStopIfLedokJoins}</b>`
+end)
+
+
+local SetAfk = GuiModule.Button(Values)
+SetAfk.Text = `АФК Режим: <b>{AfkMode}</b>`
+SetAfk.MouseButton1Click:Connect(function()
+	AfkMode = not AfkMode
+
+	SetAfk.Text = `АФК Режим: <b>{AfkMode}</b>`
+	Replicated.AFK:FireServer(AfkMode)
+end)
+
+
+local Button_Tools = GuiModule.Button(Osnova)
+Button_Tools.Text = `ℹ️ Тулсы`
+
+local Tools = GuiModule.AutoSizeFrame(Osnova)
+Tools.Visible = false
+
+Button_Tools.MouseButton1Click:Connect(function()
+	Tools.Visible = not Tools.Visible
+end)
+
+local Search = GuiModule.TextBox(Tools)
+Search.PlaceholderText = `🔎 Поиск`
+
+local Scroll = GuiModule.Scrolling(Tools)
+
+Search:GetPropertyChangedSignal(`Text`):Connect(function()
+
+	if Search.Text == `` then
+
+		for i, button in pairs(Scroll:GetChildren()) do
+			if button:IsA(`GuiButton`) then
+				button.Visible = true
+			end
+		end
+
+	else
+
+		for i, button in pairs(Scroll:GetChildren()) do
+			if button:IsA(`GuiButton`) then
+				if string.find(button.Name, Search.Text) then
+					button.Visible = true
+				else
+					button.Visible = false
+				end
+			end
+		end
+
+	end
+
+end)
+
+for i, tool in pairs(game:GetDescendants()) do 
+	if tool:IsA(`Tool`) then
+		local Btn_tool = GuiModule.Button()
+		Btn_tool.Text = `Тул: <b>{tool.Name}</b>`
+		Btn_tool.Parent = Scroll
+		Btn_tool.Name = tool.Name
+
+		Btn_tool.MouseButton1Click:Connect(function()
+			tool:Clone().Parent = Player.Backpack
+		end)
+	end
+end
+
+local ClearBackpack = GuiModule.Button(Tools)
+ClearBackpack.Text = `Очистить Backpack`
+ClearBackpack.MouseButton1Click:Connect(function()
+	Player.Backpack:ClearAllChildren()
+end)
+
+local Button_Remoyti = GuiModule.Button(Osnova)
+Button_Remoyti.Text = `ℹ️ Ремоуты`
+
+local Remoyti = GuiModule.AutoSizeFrame(Osnova)
+Remoyti.Visible = false
+
+Button_Remoyti.MouseButton1Click:Connect(function()
+	Remoyti.Visible = not Remoyti.Visible
+end)
+
+local Remotes_Search = GuiModule.TextBox(Remoyti)
+Remotes_Search.PlaceholderText = `🔎 Поиск`
+
+local RemotesScroll = GuiModule.Scrolling(Remoyti)
+RemotesScroll.Size = UDim2.fromOffset(300, 500)
+
+
+Remotes_Search:GetPropertyChangedSignal(`Text`):Connect(function()
+
+	if Remotes_Search.Text == `` then
+
+		for i, button in pairs(RemotesScroll:GetChildren()) do
+			if button:IsA(`GuiObject`) then
+				button.Visible = true
+			end
+		end
+
+	else
+		for i, button in pairs(RemotesScroll:GetChildren()) do
+			if button:IsA(`GuiObject`) then
+				if string.find(button.Name, Remotes_Search.Text) then
+					button.Visible = true
+				else
+					button.Visible = false
+				end
+			end
+		end
+
+	end
+
+end)
+
+for i, RemoteEvent in pairs(game:GetDescendants()) do
+	if RemoteEvent:IsA(`RemoteEvent`) then
+		if RemoteEvent.Parent then
+			if RemoteEvent.Parent.Name == `RobloxReplicatedStorage` or RemoteEvent.Parent.Name == `Signals` then
+				continue
+				
+			end
+		end
+		local btn_RemoteActivate = GuiModule.Button()
+		btn_RemoteActivate.Name = RemoteEvent.Name
+		btn_RemoteActivate.Text = `{RemoteEvent.Name}\n Parent: <b>{RemoteEvent.Parent.Name}</b>`
+		btn_RemoteActivate.Parent = RemotesScroll
+
+		local textb_Remote = GuiModule.TextBox(RemotesScroll)
+		textb_Remote.Name = RemoteEvent.Name
+		textb_Remote.PlaceholderText = `FireServer для {RemoteEvent.Name}`
+
+		btn_RemoteActivate.MouseButton1Click:Connect(function()
+			if textb_Remote.Text ~= `` then
+				RemoteEvent:FireServer(textb_Remote.Text)
+				textb_Remote.Text = ``
+			else
+				RemoteEvent:FireServer()
+			end
+		end)
+	end
+end
+
+
+local Button_SpamRemotes = GuiModule.Button(Remoyti)
+Button_SpamRemotes.Text = `Спамить все ремоуты: <b>{DoSpamRemoteEvents}</b>`
+
+Button_SpamRemotes.MouseButton1Click:Connect(function()
+	DoSpamRemoteEvents = not DoSpamRemoteEvents
+	Button_SpamRemotes.Text = `Спамить все ремоуты: <b>{DoSpamRemoteEvents}</b>`
+
+	if DoSpamRemoteEvents then
+		GuiModule.Notificate(`❗ все Remote Events пингуются, могут быть дропы последующих Ремоутов.`, nil, 15, Logs)
+	end
+end)
+
+local Button_Additional = GuiModule.Button(Osnova)
+Button_Additional.Text = `ℹ️ Дополнительно`
+
+local Additional = GuiModule.AutoSizeFrame(Osnova)
+Additional.Visible = false
+
+Button_Additional.MouseButton1Click:Connect(function()
+	Additional.Visible = not Additional.Visible
+end)
+
+local DeleteBarriers = GuiModule.Button(Additional)
+DeleteBarriers.Text = `Удалить барьеры к морфам`
+DeleteBarriers.MouseButton1Click:Connect(function()
+	for i, part in pairs(workspace:GetChildren()) do
+		if part:IsA(`Part`) and part:FindFirstChild(`Text`) and part:FindFirstChild(`Text`):FindFirstChild(`Contents`) then
+			part:Destroy()
+			GuiModule.Notificate(`✅ Принято!`, nil, 1, Logs)
+		else
+			print(`no`)
+		end
+		task.wait()
+	end
+	GuiModule.Notificate(`✅ Готово!`, nil, 5, Logs)
+
+end)
+
+
+local Kick = GuiModule.Button(Additional)
+Kick.Text = `Кикнуть себя`
+Kick.MouseButton1Click:Connect(function()
+	game.Players.LocalPlayer:Kick(`My Movie.`)
+end)
+
+local DeleteGui = GuiModule.Button(Additional)
+DeleteGui.Text = `Удалить гуе`
+DeleteGui.MouseButton1Click:Connect(function()
+	MainGui:Destroy()
+end)
+
+
+RunService.RenderStepped:Connect(function()
+	if DoSpam then
+		game.ReplicatedStorage.SendAnnouncement:FireServer(dirty_table[math.random(1,#dirty_table)])
+	end
+
+	if DoSpamRemoteEvents then
+		for i, RemoteEvent in pairs(game:GetDescendants()) do
+			if RemoteEvent:IsA(`RemoteEvent`) then
+				RemoteEvent:FireServer(dirty_table[math.random(1, #dirty_table)])
+			end
+			task.wait()
+		end
+	end
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+	if plr.Name == `legacaxapok1007` then
+		if AutoStopIfLedokJoins == true then
+			GuiModule.Notificate(`DoSpam остановлен.`, nil, 5, Logs)
+			DoSpam = false
+		end
+
+		if AutoKickIfLedokJoins == true then
+			plr:Kick(`[{script.Name}]: ❌ <b>Ледок зашел</b>\nAutoKickIfLedokJoins был включен.`)
+		else
+			GuiModule.Notificate(`Ledok зашел на сервер.`, nil, 15, Logs)
+		end
+	else
+		GuiModule.Notificate(`Игрок {plr.Name} зашел на сервер.`, `rbxthumb://type=AvatarHeadShot&id={plr.UserId}&w=180&h=180`, 6, Logs)
+	end
+end)
+
+game.Players.PlayerRemoving:Connect(function(plr)
+	GuiModule.Notificate(`Игрок {plr.Name} вышел с сервера.`,`rbxthumb://type=AvatarHeadShot&id={plr.UserId}&w=180&h=180`, 6, Logs)
+end)
+
+MainGui:GetPropertyChangedSignal(`AbsoluteSize`):Connect(function()
+	GuiModule.Notificate(`ℹ️ AbsoluteSize изменился на {MainGui.AbsoluteSize}.`,nil, 2.3, Logs)
+	TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
+end)
+
+
+Osnova.Visible = false
+
+local RagatkaGuiVision = GuiModule.Button()
+RagatkaGuiVision.Text = `Рагатка Гуи Вижн: <b>{Osnova.Visible}</b>`
+RagatkaGuiVision.AnchorPoint = Vector2.new(1, 0)
+RagatkaGuiVision.Position = UDim2.new(1, -6,0, 15)
+RagatkaGuiVision.Parent = MainGui
+
+RagatkaGuiVision.MouseButton1Click:Connect(function()
+	Osnova.Visible = not Osnova.Visible
+	RagatkaGuiVision.Text = `Рагатка Гуи Вижн: <b>{Osnova.Visible}</b>`
+
+	if Osnova.Visible == true then
+		TweenService:Create(Osnova, InfoBoom, {Position = UDim2.new(.5,0,.5,0)}):Play()
+	end
+end)
+
+
+if Player.Character:FindFirstChild(`AFKLocalScript`) == nil then
+	GuiModule.Notificate(`ℹ️ Ты не в плейсе ледка.`, nil, 15, Logs)
+else
+	GuiModule.Notificate(`✅ Загрузка завершена!`,nil,  5, Logs)
+
+	Player.Character:FindFirstChild(`AFKLocalScript`).Enabled = false
+end
